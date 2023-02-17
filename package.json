@@ -33,7 +33,7 @@
     "google-protobuf": "^3.21.2",
     "ibm-watson": "^7.1.2",
     "microsoft-cognitiveservices-speech-sdk": "^1.25.0",
-    "undici": "^5.18.0"
+    "undici": "^5.19.1"
   },
   "devDependencies": {
     "eslint": "^8.33.0",
