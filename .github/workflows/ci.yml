@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+      - run: npm install
+      - run: npm run jslint
+      - run: npm test
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          GCP_JSON_KEY: ${{ secrets.GCP_JSON_KEY }}
+          IBM_API_KEY: ${{ secrets.IBM_API_KEY }}
+          IBM_TTS_API_KEY: ${{ secrets.IBM_TTS_API_KEY }}
+          IBM_TTS_REGION: ${{ secrets.IBM_TTS_REGION }}
+          MICROSOFT_API_KEY: ${{ secrets.MICROSOFT_API_KEY }}
+          MICROSOFT_REGION: ${{ secrets.MICROSOFT_REGION }}
