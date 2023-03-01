@@ -35,7 +35,7 @@
     "ibm-watson": "^7.1.2",
     "form-urlencoded": "^6.1.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.25.0",
-    "undici": "^5.18.0"
+    "undici": "^5.19.1"
   },
   "devDependencies": {
     "config": "^3.3.9",
