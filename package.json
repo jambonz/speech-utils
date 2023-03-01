@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/jambonz/speech-utils#readme",
   "dependencies": {
-    "@aws-sdk/client-polly": "^3.269.0",
+    "@aws-sdk/client-polly": "^3.276.0",
     "@google-cloud/text-to-speech": "^4.2.0",
     "@grpc/grpc-js": "^1.8.7",
     "@jambonz/realtimedb-helpers": "^0.6.3",
