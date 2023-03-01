@@ -1,0 +1,13 @@
+{
+  "logging": {
+    "level": "error"
+  },
+  "redis": {
+    "host": "127.0.0.1",
+    "port": 3379
+  },
+  "redis-auth": {
+    "host": "127.0.0.1",
+    "port": 3380
+  }
+}

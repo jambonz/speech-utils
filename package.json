@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/jambonz/speech-utils#readme",
   "dependencies": {
+    "@aws-sdk/client-polly": "^3.269.0",
     "@google-cloud/text-to-speech": "^4.2.0",
     "@grpc/grpc-js": "^1.8.7",
     "@jambonz/realtimedb-helpers": "^0.6.3",
@@ -32,10 +33,12 @@
     "debug": "^4.3.4",
     "google-protobuf": "^3.21.2",
     "ibm-watson": "^7.1.2",
+    "form-urlencoded": "^6.1.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.25.0",
     "undici": "^5.19.1"
   },
   "devDependencies": {
+    "config": "^3.3.9",
     "eslint": "^8.33.0",
     "eslint-plugin-promise": "^6.1.1",
     "nyc": "^15.1.0",
