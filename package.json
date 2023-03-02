@@ -28,7 +28,7 @@
     "@google-cloud/text-to-speech": "^4.2.0",
     "@grpc/grpc-js": "^1.8.7",
     "@jambonz/realtimedb-helpers": "^0.6.3",
-    "aws-sdk": "^2.1310.0",
+    "aws-sdk": "^2.1311.0",
     "bent": "^7.3.12",
     "debug": "^4.3.4",
     "google-protobuf": "^3.21.2",
