@@ -330,10 +330,10 @@ test('Custom Vendor speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
 
-  // if (!process.env.CUSTOM_VENDOR_TTS_URL) {
-  //   t.pass('skipping Custom Vendor speech synth tests since CUSTOM_VENDOR_TTS_URL not provided');
-  //   return t.end();
-  // }
+  if (!process.env.CUSTOM_VENDOR_TTS_URL) {
+    t.pass('skipping Custom Vendor speech synth tests since CUSTOM_VENDOR_TTS_URL not provided');
+    return t.end();
+  }
   try {
     let opts = await synthAudio(stats, {
       vendor: 'custom:somethingnew',
