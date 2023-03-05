@@ -326,6 +326,47 @@ test('IBM watson speech synth tests', async(t) => {
   client.quit();
 });
 
+test('Custom Vendor speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  // if (!process.env.CUSTOM_VENDOR_TTS_URL) {
+  //   t.pass('skipping Custom Vendor speech synth tests since CUSTOM_VENDOR_TTS_URL not provided');
+  //   return t.end();
+  // }
+  try {
+    let opts = await synthAudio(stats, {
+      vendor: 'custom:somethingnew',
+      credentials: {
+        use_for_tts: 1,
+        custom_tts_url: process.env.CUSTOM_VENDOR_TTS_URL,
+        auth_token: 'some_jwt_token'
+      },
+      language: 'en-US',
+      voice: 'English-US.Female-1',
+      text: 'This is a test.  This is only a test',
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized nuance audio to ${opts.filePath}`);
+
+    opts = await synthAudio(stats, {
+      vendor: 'custom:somethingnew',
+      credentials: {
+        use_for_tts: 1,
+        custom_tts_url: process.env.CUSTOM_VENDOR_TTS_URL,
+        auth_token: 'some_jwt_token'
+      },
+      language: 'en-US',
+      voice: 'English-US.Female-1',
+      text: '<speak>This is a test.  This is only a test</speak>',
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized nuance audio to ${opts.filePath}`);
+  } catch (err) {
+    console.error(err);
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('TTS Cache tests', async(t) => {
   const fn = require('..');
   const {purgeTtsCache, client} = fn(opts, logger);
