@@ -4,6 +4,8 @@ const opts = config.get('redis');
 const fs = require('fs');
 const {makeSynthKey} = require('../lib/utils');
 const logger = require('pino')();
+const bent = require('bent');
+const getJSON = bent('json')
 
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
@@ -321,6 +323,53 @@ test('IBM watson speech synth tests', async(t) => {
     t.ok(opts.servedFromCache, `successfully retrieved ibm audio from cache ${opts.filePath}`);
   } catch (err) {
     console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('Custom Vendor speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  try {
+    let opts = await synthAudio(stats, {
+      vendor: 'custom:somethingnew',
+      credentials: {
+        use_for_tts: 1,
+        custom_tts_url: "http://127.0.0.1:3100/somethingnew",
+        auth_token: 'some_jwt_token'
+      },
+      language: 'en-US',
+      voice: 'English-US.Female-1',
+      text: 'This is a test.  This is only a test',
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized custom vendor audio to ${opts.filePath}`);
+    let obj = await getJSON(`http://127.0.0.1:3100/lastRequest/somethingnew`);
+    t.ok(obj.headers.Authorization == 'Bearer some_jwt_token', 'Custom Vendor Authentication Header is correct');
+    t.ok(obj.body.language == 'en-US', 'Custom Vendor Language is correct');
+    t.ok(obj.body.format == 'audio/mpeg', 'Custom Vendor format is correct');
+    t.ok(obj.body.voice == 'English-US.Female-1', 'Custom Vendor voice is correct');
+    t.ok(obj.body.type == 'text', 'Custom Vendor type is correct');
+    t.ok(obj.body.text == 'This is a test.  This is only a test', 'Custom Vendor text is correct');
+
+    opts = await synthAudio(stats, {
+      vendor: 'custom:somethingnew2',
+      credentials: {
+        use_for_tts: 1,
+        custom_tts_url: "http://127.0.0.1:3100/somethingnew2",
+        auth_token: 'some_jwt_token'
+      },
+      language: 'en-US',
+      voice: 'English-US.Female-1',
+      text: '<speak>This is a test.  This is only a test</speak>',
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized Custom Vendor audio to ${opts.filePath}`);
+    obj = await getJSON(`http://127.0.0.1:3100/lastRequest/somethingnew2`);
+    t.ok(obj.body.type == 'ssml', 'Custom Vendor type is correct');
+    t.ok(obj.body.text == '<speak>This is a test.  This is only a test</speak>');
+  } catch (err) {
+    console.error(err);
     t.end(err);
   }
   client.quit();
