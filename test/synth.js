@@ -337,7 +337,7 @@ test('Custom Vendor speech synth tests', async(t) => {
       vendor: 'custom:somethingnew',
       credentials: {
         use_for_tts: 1,
-        custom_tts_url: "http://172.41.0.10:3000/somethingnew",
+        custom_tts_url: "http://127.0.0.1:3100/somethingnew",
         auth_token: 'some_jwt_token'
       },
       language: 'en-US',
@@ -357,7 +357,7 @@ test('Custom Vendor speech synth tests', async(t) => {
       vendor: 'custom:somethingnew2',
       credentials: {
         use_for_tts: 1,
-        custom_tts_url: "http://172.41.0.10:3000/somethingnew2",
+        custom_tts_url: "http://127.0.0.1:3100/somethingnew2",
         auth_token: 'some_jwt_token'
       },
       language: 'en-US',
