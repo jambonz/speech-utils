@@ -427,5 +427,35 @@ test('TTS Cache tests', async(t) => {
     t.end(err);
   }
 
+  try {
+    // clear cache
+    await purgeTtsCache();
+    // save some random tts keys to cache
+    const minRecords = 8;
+    const account_sid = "12412512_cabc_5aff"
+    const account_sid2 = "22412512_cabc_5aff"
+    for (const i in Array(minRecords).fill(0)) {
+      await client.setAsync(makeSynthKey({account_sid, vendor: i, language: i, voice: i, engine: i, text: i}), i);
+    }
+    for (const i in Array(minRecords).fill(0)) {
+      await client.setAsync(makeSynthKey({account_sid: account_sid2, vendor: i, language: i, voice: i, engine: i, text: i}), i);
+    }
+    const {purgedCount} = await purgeTtsCache({account_sid});
+    t.equal(purgedCount, minRecords, `successfully purged at least ${minRecords} tts records from cache for account_sid:${account_sid}`);
+
+    let cached = (await client.keysAsync('tts:*')).length;
+    t.equal(cached, minRecords, `successfully purged all tts records from cache for account_sid:${account_sid}`);
+
+    const {purgedCount: purgedCount2} = await purgeTtsCache({account_sid: account_sid2});
+    t.equal(purgedCount2, minRecords, `successfully purged at least ${minRecords} tts records from cache for account_sid:${account_sid2}`);
+
+    cached = (await client.keysAsync('tts:*')).length;
+    t.equal(cached, 0, `successfully purged all tts records from cache`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+
   client.quit();
 });
