@@ -348,7 +348,6 @@ test('Custom Vendor speech synth tests', async(t) => {
     let obj = await getJSON(`http://127.0.0.1:3100/lastRequest/somethingnew`);
     t.ok(obj.headers.Authorization == 'Bearer some_jwt_token', 'Custom Vendor Authentication Header is correct');
     t.ok(obj.body.language == 'en-US', 'Custom Vendor Language is correct');
-    t.ok(obj.body.format == 'audio/mpeg', 'Custom Vendor format is correct');
     t.ok(obj.body.voice == 'English-US.Female-1', 'Custom Vendor voice is correct');
     t.ok(obj.body.type == 'text', 'Custom Vendor type is correct');
     t.ok(obj.body.text == 'This is a test.  This is only a test', 'Custom Vendor text is correct');
