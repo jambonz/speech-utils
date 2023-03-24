@@ -12,12 +12,12 @@ const stats = {
   histogram: () => {}
 };
 
-test('Nuance tests', async(t) => {
+test('Nuance hosted tests', async(t) => {
   const fn = require('..');
   const {client, getTtsVoices} = fn(opts, logger);
 
   if (!process.env.NUANCE_CLIENT_ID || !process.env.NUANCE_SECRET ) {
-      t.pass('skipping Nuance test since no Nuance client_id and secret provided');
+      t.pass('skipping Nuance hosted test since no Nuance client_id and secret provided');
       t.end();
       client.quit();
       return;
@@ -31,8 +31,39 @@ test('Nuance tests', async(t) => {
       }
     };
     let voices = await getTtsVoices(opts);
-    //console.log(`received ${voices.length} voices from Nuance`);
-    //console.log(JSON.stringify(voices));
+    t.ok(voices.length > 0 && voices[0].language, 
+      `GetVoices: successfully retrieved ${voices.length} voices from Nuance`);
+
+    await client.flushallAsync();
+
+    t.end();
+
+  }
+  catch (err) {
+    console.error(err);
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('Nuance on-prem tests', async(t) => {
+  const fn = require('..');
+  const {client, getTtsVoices} = fn(opts, logger);
+
+  if (!process.env.NUANCE_TTS_URI ) {
+      t.pass('skipping Nuance on-prem test since no Nuance uri provided');
+      t.end();
+      client.quit();
+      return;
+  }
+  try {
+    const opts = {
+      vendor: 'nuance',
+      credentials: {
+        nuance_tts_uri: process.env.NUANCE_TTS_URI
+      }
+    };
+    let voices = await getTtsVoices(opts);
     t.ok(voices.length > 0 && voices[0].language, 
       `GetVoices: successfully retrieved ${voices.length} voices from Nuance`);
 

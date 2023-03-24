@@ -212,7 +212,7 @@ test('Azure custom voice speech synth tests', async(t) => {
   client.quit();
 });
 
-test('Nuance speech synth tests', async(t) => {
+test('Nuance hosted speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
 
@@ -242,6 +242,43 @@ test('Nuance speech synth tests', async(t) => {
       language: 'en-US',
       voice: 'Evan',
       text: 'This is a test.  This is only a test',
+    });
+    t.ok(opts.servedFromCache, `successfully retrieved nuance audio from cache ${opts.filePath}`);
+  } catch (err) {
+    console.error(err);
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('Nuance on-prem speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.NUANCE_TTS_URI) {
+    t.pass('skipping Nuance on prem speech synth tests since NUANCE_TTS_URI not provided');
+    return t.end();
+  }
+  try {
+    let opts = await synthAudio(stats, {
+      vendor: 'nuance',
+      credentials: {
+        nuance_tts_uri: process.env.NUANCE_TTS_URI
+      },
+      language: 'en-US',
+      voice: 'Evan',
+      text: 'This is a test of on-prem.  This is only a test',
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized nuance audio to ${opts.filePath}`);
+
+    opts = await synthAudio(stats, {
+      vendor: 'nuance',
+      credentials: {
+        nuance_tts_uri: process.env.NUANCE_TTS_URI
+      },
+      language: 'en-US',
+      voice: 'Evan',
+      text: 'This is a test of on-prem.  This is only a test',
     });
     t.ok(opts.servedFromCache, `successfully retrieved nuance audio from cache ${opts.filePath}`);
   } catch (err) {
