@@ -1,5 +1,4 @@
 require('./docker_start');
 require('./synth');
-require('./nuance');
-require('./ibm');
+require('./list-voices');
 require('./docker_stop');
