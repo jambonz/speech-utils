@@ -300,7 +300,7 @@ test('Nvidia speech synth tests', async(t) => {
     let opts = await synthAudio(stats, {
       vendor: 'nvidia',
       credentials: {
-        riva_uri: process.env.RIVA_URI,
+        riva_server_uri: process.env.RIVA_URI,
       },
       language: 'en-US',
       voice: 'English-US.Female-1',
@@ -311,7 +311,7 @@ test('Nvidia speech synth tests', async(t) => {
     opts = await synthAudio(stats, {
       vendor: 'nvidia',
       credentials: {
-        riva_uri: process.env.RIVA_URI,
+        riva_server_uri: process.env.RIVA_URI,
       },
       language: 'en-US',
       voice: 'English-US.Female-1',
