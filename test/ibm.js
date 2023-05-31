@@ -31,7 +31,7 @@ test('IBM - create access key', async(t) => {
     //console.log({obj}, 'received access token from IBM - second request');
     t.ok(obj.access_token && obj.servedFromCache, 'successfully received access token from cache');
  
-    await client.flushallAsync();
+    await client.flushall();
     t.end();
   }
   catch (err) {
@@ -65,7 +65,7 @@ test('IBM - retrieve tts voices test', async(t) => {
     t.ok(voices.length > 0 && voices[0].language, 
       `GetVoices: successfully retrieved ${voices.length} voices from IBM`);
  
-    await client.flushallAsync();
+    await client.flushall();
 
     t.end();
 

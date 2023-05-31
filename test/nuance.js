@@ -34,7 +34,7 @@ test('Nuance hosted tests', async(t) => {
     t.ok(voices.length > 0 && voices[0].language, 
       `GetVoices: successfully retrieved ${voices.length} voices from Nuance`);
 
-    await client.flushallAsync();
+    await client.flushall();
 
     t.end();
 
@@ -67,7 +67,7 @@ test('Nuance on-prem tests', async(t) => {
     t.ok(voices.length > 0 && voices[0].language, 
       `GetVoices: successfully retrieved ${voices.length} voices from Nuance`);
 
-    await client.flushallAsync();
+    await client.flushall();
 
     t.end();
 

@@ -8,6 +8,8 @@
   },
   "redis-auth": {
     "host": "127.0.0.1",
-    "port": 3380
+    "port": 3380,
+    "username": "daveh",
+    "password": "foobarbazzle"
   }
 }
