@@ -413,18 +413,21 @@ test('Custom Vendor speech synth tests', async(t) => {
 
 test('TTS Cache tests', async(t) => {
   const fn = require('..');
-  const {purgeTtsCache, client} = fn(opts, logger);
+  const {purgeTtsCache, getTtsSize, client} = fn(opts, logger);
 
   try {
     // save some random tts keys to cache
     const minRecords = 8;
     for (const i in Array(minRecords).fill(0)) {
-      await client.setAsync(makeSynthKey({vendor: i, language: i, voice: i, engine: i, text: i}), i);
+      await client.set(makeSynthKey({vendor: i, language: i, voice: i, engine: i, text: i}), i);
     }
+    const count = await getTtsSize();
+    t.ok(count >= minRecords, 'getTtsSize worked.');
+    
     const {purgedCount} = await purgeTtsCache();
     t.ok(purgedCount >= minRecords, `successfully purged at least ${minRecords} tts records from cache`);
 
-    const cached = (await client.keysAsync('tts:*')).length;
+    const cached = (await client.keys('tts:*')).length;
     t.equal(cached, 0, `successfully purged all tts records from cache`);
 
   } catch (err) {
@@ -435,11 +438,11 @@ test('TTS Cache tests', async(t) => {
   try {
     // save some random tts keys to cache
     for (const i in Array(10).fill(0)) {
-      await client.setAsync(makeSynthKey({vendor: i, language: i, voice: i, engine: i, text: i}), i);
+      await client.set(makeSynthKey({vendor: i, language: i, voice: i, engine: i, text: i}), i);
     }
     // save a specific key to tts cache
     const opts = {vendor: 'aws', language: 'en-US', voice: 'MALE', engine: 'Engine', text: 'Hello World!'};
-    await client.setAsync(makeSynthKey(opts), opts.text);
+    await client.set(makeSynthKey(opts), opts.text);
 
     const {purgedCount} = await purgeTtsCache({all: false, ...opts});
     t.ok(purgedCount === 1, `successfully purged one specific tts record from cache`);
@@ -455,7 +458,7 @@ test('TTS Cache tests', async(t) => {
     t.ok(error, `error returned when specified key was not found`);
 
     // make sure other tts keys are still there
-    const cached = (await client.keysAsync('tts:*')).length;
+    const cached = (await client.keys('tts:*')).length;
     t.ok(cached >= 1, `successfully kept all non-specified tts records in cache`);
 
   } catch (err) {
@@ -471,21 +474,21 @@ test('TTS Cache tests', async(t) => {
     const account_sid = "12412512_cabc_5aff"
     const account_sid2 = "22412512_cabc_5aff"
     for (const i in Array(minRecords).fill(0)) {
-      await client.setAsync(makeSynthKey({account_sid, vendor: i, language: i, voice: i, engine: i, text: i}), i);
+      await client.set(makeSynthKey({account_sid, vendor: i, language: i, voice: i, engine: i, text: i}), i);
     }
     for (const i in Array(minRecords).fill(0)) {
-      await client.setAsync(makeSynthKey({account_sid: account_sid2, vendor: i, language: i, voice: i, engine: i, text: i}), i);
+      await client.set(makeSynthKey({account_sid: account_sid2, vendor: i, language: i, voice: i, engine: i, text: i}), i);
     }
     const {purgedCount} = await purgeTtsCache({account_sid});
     t.equal(purgedCount, minRecords, `successfully purged at least ${minRecords} tts records from cache for account_sid:${account_sid}`);
 
-    let cached = (await client.keysAsync('tts:*')).length;
+    let cached = (await client.keys('tts:*')).length;
     t.equal(cached, minRecords, `successfully purged all tts records from cache for account_sid:${account_sid}`);
 
     const {purgedCount: purgedCount2} = await purgeTtsCache({account_sid: account_sid2});
     t.equal(purgedCount2, minRecords, `successfully purged at least ${minRecords} tts records from cache for account_sid:${account_sid2}`);
 
-    cached = (await client.keysAsync('tts:*')).length;
+    cached = (await client.keys('tts:*')).length;
     t.equal(cached, 0, `successfully purged all tts records from cache`);
 
   } catch (err) {

@@ -31,7 +31,7 @@ test('IBM - create access key', async(t) => {
     //console.log({obj}, 'received access token from IBM - second request');
     t.ok(obj.access_token && obj.servedFromCache, 'successfully received access token from cache');
  
-    await client.flushallAsync();
+    await client.flushall();
     t.end();
   }
   catch (err) {
@@ -65,7 +65,7 @@ test('IBM - retrieve tts voices test', async(t) => {
     t.ok(voices.length > 0 && voices[0].language, 
       `GetVoices: successfully retrieved ${voices.length} voices from IBM`);
  
-    await client.flushallAsync();
+    await client.flushall();
 
     t.end();
 
@@ -99,7 +99,7 @@ test('Nuance hosted tests', async(t) => {
     t.ok(voices.length > 0 && voices[0].language, 
       `GetVoices: successfully retrieved ${voices.length} voices from Nuance`);
 
-    await client.flushallAsync();
+    await client.flushall();
 
     t.end();
 
@@ -132,7 +132,7 @@ test('Nuance on-prem tests', async(t) => {
     t.ok(voices.length > 0 && voices[0].language, 
       `GetVoices: successfully retrieved ${voices.length} voices from Nuance`);
 
-    await client.flushallAsync();
+    await client.flushall();
 
     t.end();
 
@@ -162,7 +162,7 @@ test('Google tests', async(t) => {
     let result = await getTtsVoices(opts);
     t.ok(result[0].voices.length > 0, `GetVoices: successfully retrieved ${result[0].voices.length} voices from Google`);
 
-    await client.flushallAsync();
+    await client.flushall();
 
     t.end();
   }
@@ -193,7 +193,7 @@ test('AWS tests', async(t) => {
     let result = await getTtsVoices(opts);
     t.ok(result?.Voices?.length > 0, `GetVoices: successfully retrieved ${result.Voices.length} voices from AWS`);
 
-    await client.flushallAsync();
+    await client.flushall();
 
     t.end();
   }
