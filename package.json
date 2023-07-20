@@ -26,7 +26,7 @@
   "dependencies": {
     "@aws-sdk/client-polly": "^3.359.0",
     "@google-cloud/text-to-speech": "^4.2.1",
-    "@grpc/grpc-js": "^1.8.13",
+    "@grpc/grpc-js": "^1.8.17",
     "bent": "^7.3.12",
     "debug": "^4.3.4",
     "form-urlencoded": "^6.1.0",
