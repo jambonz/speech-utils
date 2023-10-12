@@ -411,6 +411,35 @@ test('Custom Vendor speech synth tests', async(t) => {
   client.quit();
 });
 
+test('Elevenlabs speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.ELEVENLABS_API_KEY || !process.env.ELEVENLABS_VOICE_ID || !process.env.ELEVENLABS_MODEL_ID) {
+    t.pass('skipping IBM Watson speech synth tests since IBM_TTS_API_KEY or IBM_TTS_API_KEY not provided');
+    return t.end();
+  }
+  const text = `<speak> Hi there and welcome to jambones! jambones is the <sub alias="seapass">CPaaS</sub> designed with the needs of communication service providers in mind. This is an example of simple text-to-speech, but there is so much more you can do. Try us out!</speak>`;
+  try {
+    let opts = await synthAudio(stats, {
+      vendor: 'elevenlabs',
+      credentials: {
+        api_key: process.env.ELEVENLABS_API_KEY,
+        model_id: process.env.ELEVENLABS_MODEL_ID
+      },
+      language: 'en-US',
+      voice: process.env.ELEVENLABS_VOICE_ID,
+      text,
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized eleven audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+})
+
 test('TTS Cache tests', async(t) => {
   const fn = require('..');
   const {purgeTtsCache, getTtsSize, client} = fn(opts, logger);
