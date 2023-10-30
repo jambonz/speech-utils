@@ -79,6 +79,40 @@ test('Google speech synth tests', async(t) => {
   client.quit();
 });
 
+test('Google speech Custom voice synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.GCP_CUSTOM_VOICE_FILE && !process.env.GCP_CUSTOM_VOICE_JSON_KEY || !process.env.GCP_CUSTOM_VOICE_MODEL) {
+    t.pass('skipping google speech synth tests since neither GCP_CUSTOM_VOICE_FILE nor GCP_CUSTOM_VOICE_JSON_KEY provided, GCP_CUSTOM_VOICE_MODEL is not provided');
+    return t.end();
+  }
+  try {
+    const str = process.env.GCP_CUSTOM_VOICE_JSON_KEY || fs.readFileSync(process.env.GCP_CUSTOM_VOICE_FILE);
+    const creds = JSON.parse(str);
+    let opts = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-AU',
+      text: 'This is a test.  This is only a test',
+      voice: {
+        reportedUsage:"REALTIME",
+        model: process.env.GCP_CUSTOM_VOICE_MODEL
+      }
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized google custom voice audio to ${opts.filePath}`);
+  } catch (err) {
+    console.error(err);
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('AWS speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
