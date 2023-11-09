@@ -488,7 +488,7 @@ test('whisper speech synth tests', async(t) => {
       vendor: 'whisper',
       credentials: {
         api_key: process.env.OPENAI_API_KEY,
-        model: 'tts-1'
+        model_id: 'tts-1'
       },
       language: 'en-US',
       voice: 'alloy',
