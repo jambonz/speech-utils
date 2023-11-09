@@ -32,8 +32,9 @@
     "form-urlencoded": "^6.1.0",
     "google-protobuf": "^3.21.2",
     "ibm-watson": "^8.0.0",
-    "microsoft-cognitiveservices-speech-sdk": "^1.31.0",
     "ioredis": "^5.3.2",
+    "microsoft-cognitiveservices-speech-sdk": "^1.31.0",
+    "openai": "^4.16.2",
     "undici": "^5.21.0"
   },
   "devDependencies": {

@@ -450,7 +450,7 @@ test('Elevenlabs speech synth tests', async(t) => {
   const {synthAudio, client} = fn(opts, logger);
 
   if (!process.env.ELEVENLABS_API_KEY || !process.env.ELEVENLABS_VOICE_ID || !process.env.ELEVENLABS_MODEL_ID) {
-    t.pass('skipping IBM Watson speech synth tests since IBM_TTS_API_KEY or IBM_TTS_API_KEY not provided');
+    t.pass('skipping ElevenLabs speech synth tests since ELEVENLABS_API_KEY or ELEVENLABS_VOICE_ID or ELEVENLABS_MODEL_ID not provided');
     return t.end();
   }
   const text = 'Hi there and welcome to jambones!';
@@ -466,6 +466,35 @@ test('Elevenlabs speech synth tests', async(t) => {
       text,
     });
     t.ok(!opts.servedFromCache, `successfully synthesized eleven audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+})
+
+test('whisper speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.OPENAI_API_KEY) {
+    t.pass('skipping OPENAI speech synth tests since OPENAI_API_KEY not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambones!';
+  try {
+    let opts = await synthAudio(stats, {
+      vendor: 'whisper',
+      credentials: {
+        api_key: process.env.OPENAI_API_KEY,
+        model_id: 'tts-1'
+      },
+      language: 'en-US',
+      voice: 'alloy',
+      text,
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized whisper audio to ${opts.filePath}`);
 
   } catch (err) {
     console.error(JSON.stringify(err));
