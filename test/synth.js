@@ -38,7 +38,7 @@ test('Google speech synth tests', async(t) => {
         },
       },
       language: 'en-GB',
-      gender: 'MALE',
+      gender: 'FEMALE',
       text: 'This is a test.  This is only a test',
       salt: 'foo.bar',
     });
@@ -53,7 +53,7 @@ test('Google speech synth tests', async(t) => {
         },
       },
       language: 'en-GB',
-      gender: 'MALE',
+      gender: 'FEMALE',
       text: 'This is a test.  This is only a test',
     });
     t.ok(opts.servedFromCache, `successfully retrieved cached google audio from ${opts.filePath}`);
@@ -68,7 +68,7 @@ test('Google speech synth tests', async(t) => {
       },
       disableTtsCache: true,
       language: 'en-GB',
-      gender: 'MALE',
+      gender: 'FEMALE',
       text: 'This is a test.  This is only a test',
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google audio regardless of current cache to ${opts.filePath}`);
