@@ -474,7 +474,7 @@ test('Elevenlabs speech synth tests', async(t) => {
   client.quit();
 })
 
-test('openai speech synth tests', async(t) => {
+test('whisper speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
 
@@ -485,7 +485,7 @@ test('openai speech synth tests', async(t) => {
   const text = 'Hi there and welcome to jambones!';
   try {
     let opts = await synthAudio(stats, {
-      vendor: 'openai',
+      vendor: 'whisper',
       credentials: {
         api_key: process.env.OPENAI_API_KEY,
         model: 'tts-1'
@@ -494,7 +494,7 @@ test('openai speech synth tests', async(t) => {
       voice: 'alloy',
       text,
     });
-    t.ok(!opts.servedFromCache, `successfully synthesized openai audio to ${opts.filePath}`);
+    t.ok(!opts.servedFromCache, `successfully synthesized whisper audio to ${opts.filePath}`);
 
   } catch (err) {
     console.error(JSON.stringify(err));
