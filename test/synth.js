@@ -518,10 +518,10 @@ test('playht speech synth tests', async(t) => {
       credentials: {
         api_key: process.env.PLAYHT_API_KEY,
         user_id: process.env.PLAYHT_USER_ID,
-        voice_engine: 'PlayHT2.0'
       },
       language: 'en-US',
       voice: 's3://peregrine-voices/oliver_narrative2_parrot_saad/manifest.json',
+      model: 'PlayHT2.0',
       text,
       options: {
         emotion: "male_sad"
