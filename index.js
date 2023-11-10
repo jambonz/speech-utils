@@ -1,33 +1,12 @@
 const {noopLogger} = require('./lib/utils');
-const Redis = require('ioredis');
 
 module.exports = (opts, logger) => {
   logger = logger || noopLogger;
-  const connectionOpts = {...opts};
-  // Support legacy app
-  if (process.env.JAMBONES_REDIS_USERNAME && process.env.JAMBONES_REDIS_PASSWORD) {
-    if (Array.isArray(connectionOpts)) {
-      for (const o of opts) {
-        o.username = process.env.JAMBONES_REDIS_USERNAME;
-        o.password = process.env.JAMBONES_REDIS_PASSWORD;
-      }
-    } else {
-      connectionOpts.username = process.env.JAMBONES_REDIS_USERNAME;
-      connectionOpts.password = process.env.JAMBONES_REDIS_PASSWORD;
-    }
+  let client = opts.redis_client;
+  if (!client) {
+    const {client: redisClient} = require('@jambonz/realtimedb-helpers')(opts, logger);
+    client = redisClient;
   }
-
-  const client = new Redis(connectionOpts);
-  ['ready', 'connect', 'reconnecting', 'error', 'end', 'warning']
-    .forEach((event) => {
-      client.on(event, (...args) => {
-        if ('error' === event) {
-          if (process.env.NODE_ENV === 'test' && args[0]?.code === 'ECONNREFUSED') return;
-          logger.error({...args}, '@jambonz/realtimedb-helpers - redis error');
-        }
-        else logger.debug({args}, `redis event ${event}`);
-      });
-    });
 
   return {
     client,
