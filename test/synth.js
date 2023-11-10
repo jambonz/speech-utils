@@ -501,7 +501,40 @@ test('whisper speech synth tests', async(t) => {
     t.end(err);
   }
   client.quit();
-})
+});
+
+test('playht speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.PLAYHT_API_KEY || !process.env.PLAYHT_USER_ID) {
+    t.pass('skipping playht speech synth tests since PLAYHT_API_KEY, PLAYHT_USER_ID not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambones!';
+  try {
+    let opts = await synthAudio(stats, {
+      vendor: 'playht',
+      credentials: {
+        api_key: process.env.PLAYHT_API_KEY,
+        user_id: process.env.PLAYHT_USER_ID,
+        voice_engine: 'PlayHT2.0'
+      },
+      language: 'en-US',
+      voice: 's3://peregrine-voices/oliver_narrative2_parrot_saad/manifest.json',
+      text,
+      options: {
+        emotion: "male_sad"
+      }
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized playht audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
 
 test('TTS Cache tests', async(t) => {
   const fn = require('..');
