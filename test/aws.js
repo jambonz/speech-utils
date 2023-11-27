@@ -20,12 +20,12 @@ test('AWS - create and cache auth token', async(t) => {
   }
   try {
     let obj = await getAwsAuthToken(process.env.AWS_ACCESS_KEY_ID, process.env.AWS_SECRET_ACCESS_KEY, process.env.AWS_REGION);
-    console.log({obj}, 'received auth token from AWS');
+    //console.log({obj}, 'received auth token from AWS');
     t.ok(obj.sessionToken && !obj.servedFromCache, 'successfullY generated auth token from AWS');
 
     await sleep(250);
     obj = await getAwsAuthToken(process.env.AWS_ACCESS_KEY_ID, process.env.AWS_SECRET_ACCESS_KEY, process.env.AWS_REGION);
-    console.log({obj}, 'received auth token from AWS - second request');
+    //console.log({obj}, 'received auth token from AWS - second request');
     t.ok(obj.sessionToken && obj.servedFromCache, 'successfully received access token from cache');
  
     await client.flushall();
