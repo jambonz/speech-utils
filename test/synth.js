@@ -459,7 +459,16 @@ test('Elevenlabs speech synth tests', async(t) => {
       vendor: 'elevenlabs',
       credentials: {
         api_key: process.env.ELEVENLABS_API_KEY,
-        model_id: process.env.ELEVENLABS_MODEL_ID
+        model_id: process.env.ELEVENLABS_MODEL_ID,
+        options: JSON.stringify({
+          optimize_streaming_latency: 1,
+          voice_settings: {
+            similarity_boost: 1,
+            stability: 0.8,
+            style: 1,
+            use_speaker_boost: true
+          }
+        })
       },
       language: 'en-US',
       voice: process.env.ELEVENLABS_VOICE_ID,
