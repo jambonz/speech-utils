@@ -2,13 +2,11 @@ const {noopLogger} = require('./lib/utils');
 
 module.exports = (opts, logger) => {
   logger = logger || noopLogger;
-  let client = opts.redis_client;
   const {
-    client: redisClient,
+    client,
     createHash,
     retrieveHash
   } = require('@jambonz/realtimedb-helpers')(opts, logger);
-  client = opts.redis_client || redisClient;
 
   return {
     client,
