@@ -182,7 +182,9 @@ test('Azure speech synth tests', async(t) => {
       text: longText,
     });
     t.ok(!opts.servedFromCache, `successfully synthesized microsoft audio to ${opts.filePath}`);
-
+    if (process.env.JAMBONES_HTTP_PROXY_IP && process.env.JAMBONES_HTTP_PROXY_PORT) {
+      t.pass('successfully used proxy to reach microsoft tts service');
+    }
 
     opts = await synthAudio(stats, {
       vendor: 'microsoft',
