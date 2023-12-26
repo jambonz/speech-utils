@@ -514,6 +514,33 @@ test('whisper speech synth tests', async(t) => {
   client.quit();
 })
 
+test('Deepgram speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.DEEPGRAM_API_KEY) {
+    t.pass('skipping Deepgram speech synth tests since DEEPGRAM_API_KEY');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambones!';
+  try {
+    let opts = await synthAudio(stats, {
+      vendor: 'deepgram',
+      credentials: {
+        api_key: process.env.DEEPGRAM_API_KEY
+      },
+      model: 'alpha-asteria-en-v2',
+      text,
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized deepgram audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+})
+
 test('TTS Cache tests', async(t) => {
   const fn = require('..');
   const {purgeTtsCache, getTtsSize, client} = fn(opts, logger);
