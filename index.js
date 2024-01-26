@@ -12,6 +12,7 @@ module.exports = (opts, logger) => {
     client,
     getTtsSize: require('./lib/get-tts-size').bind(null, client, logger),
     purgeTtsCache: require('./lib/purge-tts-cache').bind(null, client, logger),
+    addFileToCache: require('./lib/add-file-to-cache').bind(null, client, logger),
     synthAudio: require('./lib/synth-audio').bind(null, client, logger),
     getNuanceAccessToken: require('./lib/get-nuance-access-token').bind(null, client, logger),
     getIbmAccessToken: require('./lib/get-ibm-access-token').bind(null, client, logger),

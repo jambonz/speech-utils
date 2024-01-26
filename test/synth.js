@@ -20,7 +20,7 @@ const stats = {
 
 test('Google speech synth tests', async(t) => {
   const fn = require('..');
-  const {synthAudio, client} = fn(opts, logger);
+  const {synthAudio, addFileToCache, client} = fn(opts, logger);
 
   if (!process.env.GCP_FILE && !process.env.GCP_JSON_KEY) {
     t.pass('skipping google speech synth tests since neither GCP_FILE nor GCP_JSON_KEY provided');
@@ -57,6 +57,14 @@ test('Google speech synth tests', async(t) => {
       text: 'This is a test.  This is only a test',
     });
     t.ok(opts.servedFromCache, `successfully retrieved cached google audio from ${opts.filePath}`);
+
+    const success = await addFileToCache(opts.filePath, {
+      vendor: 'google',
+      language: 'en-GB',
+      gender: 'FEMALE',
+      text: 'This is a test.  This is only a test'
+    });
+    t.ok(success, `successfully added ${opts.filePath} to cache`);
 
     opts = await synthAudio(stats, {
       vendor: 'google',
