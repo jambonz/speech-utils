@@ -537,7 +537,7 @@ test('Deepgram speech synth tests', async(t) => {
       credentials: {
         api_key: process.env.DEEPGRAM_API_KEY
       },
-      model: 'alpha-asteria-en-v2',
+      model: 'aura-asteria-en',
       text,
     });
     t.ok(!opts.servedFromCache, `successfully synthesized deepgram audio to ${opts.filePath}`);
