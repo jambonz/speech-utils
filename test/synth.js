@@ -212,6 +212,56 @@ test('Azure speech synth tests', async(t) => {
   client.quit();
 });
 
+test('Azure SSML tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.MICROSOFT_API_KEY || !process.env.MICROSOFT_REGION) {
+    t.pass('skipping Microsoft speech synth tests since MICROSOFT_API_KEY or MICROSOFT_REGION not provided');
+    return t.end();
+  }
+  try {
+    const text = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
+    <voice name="en-US-JennyMultilingualNeural">
+    <mstts:express-as style="cheerful" styledegree="2">That'd be just amazing!
+    </mstts:express-as>
+    </voice>
+    </speak>`;
+
+    let opts = await synthAudio(stats, {
+      vendor: 'microsoft',
+      credentials: {
+        api_key: process.env.MICROSOFT_API_KEY,
+        region: process.env.MICROSOFT_REGION,
+      },
+      language: 'en-US',
+      voice: 'en-US-ChristopherNeural',
+      text,
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized microsoft audio to ${opts.filePath}`);
+    if (process.env.JAMBONES_HTTP_PROXY_IP && process.env.JAMBONES_HTTP_PROXY_PORT) {
+      t.pass('successfully used proxy to reach microsoft tts service');
+    }
+
+    opts = await synthAudio(stats, {
+      vendor: 'microsoft',
+      credentials: {
+        api_key: process.env.MICROSOFT_API_KEY,
+        region: process.env.MICROSOFT_REGION,
+      },
+      language: 'en-US',
+      voice: 'en-US-ChristopherNeural',
+      text,
+    });
+    t.ok(opts.servedFromCache, `successfully retrieved microsoft audio from cache ${opts.filePath}`);
+  } catch (err) {
+    console.error(err);
+    t.end(err);
+  }
+  client.quit();
+});
+
+
 test('Azure custom voice speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
