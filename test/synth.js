@@ -204,7 +204,8 @@ test('Azure speech synth tests', async(t) => {
       language: 'en-US',
       voice: 'en-US-ChristopherNeural',
       text: longText,
-      renderForCaching: true
+      renderForCaching: true,
+      disableTtsStreaming: true
     });
     t.ok(opts.servedFromCache, `successfully retrieved microsoft audio from cache ${opts.filePath}`);
   } catch (err) {
@@ -254,6 +255,8 @@ test('Azure SSML tests', async(t) => {
       language: 'en-US',
       voice: 'en-US-ChristopherNeural',
       text,
+      renderForCaching: true,
+      disableTtsStreaming: true
     });
     t.ok(opts.servedFromCache, `successfully retrieved microsoft audio from cache ${opts.filePath}`);
   } catch (err) {
