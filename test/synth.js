@@ -188,6 +188,7 @@ test('Azure speech synth tests', async(t) => {
       language: 'en-US',
       voice: 'en-US-ChristopherNeural',
       text: longText,
+      renderForCaching: true
     });
     t.ok(!opts.servedFromCache, `successfully synthesized microsoft audio to ${opts.filePath}`);
     if (process.env.JAMBONES_HTTP_PROXY_IP && process.env.JAMBONES_HTTP_PROXY_PORT) {
@@ -203,6 +204,7 @@ test('Azure speech synth tests', async(t) => {
       language: 'en-US',
       voice: 'en-US-ChristopherNeural',
       text: longText,
+      renderForCaching: true
     });
     t.ok(opts.servedFromCache, `successfully retrieved microsoft audio from cache ${opts.filePath}`);
   } catch (err) {
@@ -237,6 +239,7 @@ test('Azure SSML tests', async(t) => {
       language: 'en-US',
       voice: 'en-US-ChristopherNeural',
       text,
+      renderForCaching: true
     });
     t.ok(!opts.servedFromCache, `successfully synthesized microsoft audio to ${opts.filePath}`);
     if (process.env.JAMBONES_HTTP_PROXY_IP && process.env.JAMBONES_HTTP_PROXY_PORT) {
@@ -252,6 +255,7 @@ test('Azure SSML tests', async(t) => {
       language: 'en-US',
       voice: 'en-US-ChristopherNeural',
       text,
+      renderForCaching: true
     });
     t.ok(opts.servedFromCache, `successfully retrieved microsoft audio from cache ${opts.filePath}`);
   } catch (err) {
@@ -283,6 +287,7 @@ test('Azure custom voice speech synth tests', async(t) => {
       language: 'en-US',
       voice: process.env.MICROSOFT_CUSTOM_VOICE,
       text,
+      renderForCaching: true
     });
     t.ok(!opts.servedFromCache, `successfully synthesized microsoft audio to ${opts.filePath}`);
 
@@ -297,6 +302,7 @@ test('Azure custom voice speech synth tests', async(t) => {
       language: 'en-US',
       voice: process.env.MICROSOFT_CUSTOM_VOICE,
       text,
+      renderForCaching: true
     });
     t.ok(opts.servedFromCache, `successfully retrieved microsoft custom voice audio from cache ${opts.filePath}`);
   } catch (err) {
