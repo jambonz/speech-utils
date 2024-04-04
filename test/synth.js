@@ -595,6 +595,7 @@ test('Deepgram speech synth tests', async(t) => {
       },
       model: 'aura-asteria-en',
       text,
+      renderForCaching: true
     });
     t.ok(!opts.servedFromCache, `successfully synthesized deepgram audio to ${opts.filePath}`);
 
