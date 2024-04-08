@@ -1,6 +1,6 @@
 {
   "name": "@jambonz/speech-utils",
-  "version": "0.0.49",
+  "version": "0.0.50",
   "description": "TTS-related speech utilities for jambonz",
   "main": "index.js",
   "author": "Dave Horton",
