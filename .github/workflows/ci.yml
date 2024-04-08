@@ -8,8 +8,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - run: npm install
@@ -32,5 +32,7 @@ jobs:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
           ELEVENLABS_MODEL_ID: ${{ secrets.ELEVENLABS_MODEL_ID }}
+          PLAYHT_USER_ID: ${{ secrets.PLAYHT_USER_ID }}
+          PLAYHT_API_KEY: ${{ secrets.PLAYHT_API_KEY }}
           JAMBONES_HTTP_PROXY_IP: 127.0.0.1
           JAMBONES_HTTP_PROXY_PORT: 3128
