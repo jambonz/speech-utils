@@ -41,6 +41,7 @@ test('Google speech synth tests', async(t) => {
       gender: 'FEMALE',
       text: 'This is a test.  This is only a test',
       salt: 'foo.bar',
+      renderForCaching: true
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google audio to ${opts.filePath}`);
 
@@ -55,6 +56,7 @@ test('Google speech synth tests', async(t) => {
       language: 'en-GB',
       gender: 'FEMALE',
       text: 'This is a test.  This is only a test',
+      renderForCaching: true
     });
     t.ok(opts.servedFromCache, `successfully retrieved cached google audio from ${opts.filePath}`);
 
@@ -78,6 +80,7 @@ test('Google speech synth tests', async(t) => {
       language: 'en-GB',
       gender: 'FEMALE',
       text: 'This is a test.  This is only a test',
+      renderForCaching: true
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google audio regardless of current cache to ${opts.filePath}`);
   } catch (err) {
@@ -111,7 +114,8 @@ test('Google speech Custom voice synth tests', async(t) => {
       voice: {
         reportedUsage:"REALTIME",
         model: process.env.GCP_CUSTOM_VOICE_MODEL
-      }
+      },
+      renderForCaching: true
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google custom voice audio to ${opts.filePath}`);
   } catch (err) {
