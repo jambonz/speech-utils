@@ -480,6 +480,7 @@ test('Custom Vendor speech synth tests', async(t) => {
       language: 'en-US',
       voice: 'English-US.Female-1',
       text: 'This is a test.  This is only a test',
+      renderForCaching: true
     });
     t.ok(!opts.servedFromCache, `successfully synthesized custom vendor audio to ${opts.filePath}`);
     let obj = await getJSON(`http://127.0.0.1:3100/lastRequest/somethingnew`);
@@ -499,6 +500,7 @@ test('Custom Vendor speech synth tests', async(t) => {
       language: 'en-US',
       voice: 'English-US.Female-1',
       text: '<speak>This is a test.  This is only a test</speak>',
+      renderForCaching: true
     });
     t.ok(!opts.servedFromCache, `successfully synthesized Custom Vendor audio to ${opts.filePath}`);
     obj = await getJSON(`http://127.0.0.1:3100/lastRequest/somethingnew2`);
