@@ -162,6 +162,33 @@ test('AWS speech synth tests', async(t) => {
   client.quit();
 });
 
+test('AWS speech synth tests by RoleArn', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.AWS_ROLE_ARN || !process.env.AWS_REGION) {
+    t.pass('skipping AWS speech synth tests by RoleArn since AWS_ROLE_ARN or AWS_REGION not provided');
+    return t.end();
+  }
+  try {
+    let opts = await synthAudio(stats, {
+      vendor: 'aws',
+      credentials: {
+        roleArn: process.env.AWS_ROLE_ARN,
+        region: process.env.AWS_REGION,
+      },
+      language: 'en-US',
+      voice: 'Joey',
+      text: 'This is a test.  This is only a test',
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized aws by roleArn audio to ${opts.filePath}`);
+  } catch (err) {
+    console.error(err);
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('Azure speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
