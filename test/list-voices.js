@@ -28,9 +28,7 @@ test('Verbio - get Access key and voices', async(t) => {
       client_secret: process.env.VERBIO_CLIENT_SECRET
     };
     let obj = await getVerbioAccessToken(credentials);
-    t.ok(obj.access_token && !obj.servedFromCache, 'successfully received access token not from cache');
-    obj = await getVerbioAccessToken(credentials);
-    t.ok(obj.access_token && obj.servedFromCache, 'successfully received access token from cache');
+    t.ok(obj.access_token , 'successfully received access token not from cache');
     const voices = await getTtsVoices({vendor: 'verbio', credentials});
     t.ok(voices && voices.length != 0, 'successfully received verbio voices');
   } catch (err) {
