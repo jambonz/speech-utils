@@ -62,9 +62,9 @@ function deserialize_nuance_tts_v1_UnarySynthesisResponse(buffer_arg) {
 
 //
 // The Synthesizer service offers these functionalities:
-// - GetVoices: Queries the list of available voices, with filters to reduce the search space.  
-// - Synthesize: Synthesizes audio from input text and parameters, and returns an audio stream. 
-// - UnarySynthesize: Synthesizes audio from input text and parameters, and returns a single audio response. 
+// - GetVoices: Queries the list of available voices, with filters to reduce the search space.
+// - Synthesize: Synthesizes audio from input text and parameters, and returns an audio stream.
+// - UnarySynthesize: Synthesizes audio from input text and parameters, and returns a single audio response.
 var SynthesizerService = exports.SynthesizerService = {
   getVoices: {
     path: '/nuance.tts.v1.Synthesizer/GetVoices',
