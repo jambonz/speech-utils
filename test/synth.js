@@ -789,8 +789,19 @@ test('TTS Cache tests', async(t) => {
     t.ok(error, `error returned when specified key was not found`);
 
     // make sure other tts keys are still there
-    const cached = (await client.keys('tts:*')).length;
-    t.ok(cached >= 1, `successfully kept all non-specified tts records in cache`);
+    const cached = await client.keys('tts:*')
+    t.ok(cached.length >= 1, `successfully kept all non-specified tts records in cache`);
+
+    // retrieve keys from cache and check the key contains the file extension    
+    let key = cached[0];
+    t.ok(key.includes('mp3'), `tts cache extension shoult be part of the key and equal mp3`);
+
+    process.env.VG_TRIM_TTS_SILENCE = 'true';    
+    await client.set(makeSynthKey({ vendor: 'azure' }), 'value');
+
+    const r8Keys = await client.keys('tts:r8*');
+    key = r8Keys[0];
+    t.ok(key.includes('r8'), `tts cache extension shoult be part of the key and equal r8`);
 
   } catch (err) {
     console.error(JSON.stringify(err));

@@ -57,7 +57,7 @@ function deserialize_nvidia_riva_tts_SynthesizeSpeechResponse(buffer_arg) {
 var RivaSpeechSynthesisService = exports.RivaSpeechSynthesisService = {
   // Used to request text-to-speech from the service. Submit a request containing the
 // desired text and configuration, and receive audio bytes in the requested format.
-synthesize: {
+  synthesize: {
     path: '/nvidia.riva.tts.RivaSpeechSynthesis/Synthesize',
     requestStream: false,
     responseStream: false,
@@ -69,9 +69,9 @@ synthesize: {
     responseDeserialize: deserialize_nvidia_riva_tts_SynthesizeSpeechResponse,
   },
   // Used to request text-to-speech returned via stream as it becomes available.
-// Submit a SynthesizeSpeechRequest with desired text and configuration,
-// and receive stream of bytes in the requested format.
-synthesizeOnline: {
+  // Submit a SynthesizeSpeechRequest with desired text and configuration,
+  // and receive stream of bytes in the requested format.
+  synthesizeOnline: {
     path: '/nvidia.riva.tts.RivaSpeechSynthesis/SynthesizeOnline',
     requestStream: false,
     responseStream: true,
@@ -83,7 +83,7 @@ synthesizeOnline: {
     responseDeserialize: deserialize_nvidia_riva_tts_SynthesizeSpeechResponse,
   },
   // Enables clients to request the configuration of the current Synthesize service, or a specific model within the service.
-getRivaSynthesisConfig: {
+  getRivaSynthesisConfig: {
     path: '/nvidia.riva.tts.RivaSpeechSynthesis/GetRivaSynthesisConfig',
     requestStream: false,
     responseStream: false,

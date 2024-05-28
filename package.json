@@ -12,6 +12,7 @@
     "test": "NODE_ENV=test node test/ ",
     "coverage": "nyc --reporter html --report-dir ./coverage npm run test",
     "jslint": "eslint index.js lib",
+    "jslint:fix": "eslint --fix '**/*.js'",
     "build": "./build_stubs.sh"
   },
   "repository": {
