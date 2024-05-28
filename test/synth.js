@@ -670,6 +670,40 @@ test('whisper speech synth tests', async(t) => {
       language: 'en-US',
       voice: 'alloy',
       text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized whisper audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('Verbio speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.VERBIO_CLIENT_ID || !process.env.VERBIO_CLIENT_SECRET) {
+    t.pass('skipping Verbio Synthesize test since no Verbio Keys provided');
+    t.end();
+    client.quit();
+    return;
+  }
+
+  const text = 'Hi there and welcome to jambones!';
+  try {
+    let opts = await synthAudio(stats, {
+      vendor: 'verbio',
+      credentials: {
+        client_id: process.env.VERBIO_CLIENT_ID,
+        client_secret: process.env.VERBIO_CLIENT_SECRET
+      },
+      language: 'en-US',
+      voice: 'tommy_en-us',
+      text,
+      renderForCaching: true
     });
     t.ok(!opts.servedFromCache, `successfully synthesized whisper audio to ${opts.filePath}`);
 

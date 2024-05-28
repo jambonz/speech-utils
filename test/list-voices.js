@@ -12,6 +12,32 @@ const stats = {
   histogram: () => {}
 };
 
+test('Verbio - get Access key and voices', async(t) => {
+  const fn = require('..');
+  const {client, getTtsVoices, getVerbioAccessToken} = fn(opts, logger);
+  if (!process.env.VERBIO_CLIENT_ID || !process.env.VERBIO_CLIENT_SECRET) {
+    t.pass('skipping Verbio test since no Verbio Keys provided');
+    t.end();
+    client.quit();
+    return;
+  }
+
+  try {
+    const credentials = {
+      client_id: process.env.VERBIO_CLIENT_ID,
+      client_secret: process.env.VERBIO_CLIENT_SECRET
+    };
+    let obj = await getVerbioAccessToken(credentials);
+    t.ok(obj.access_token , 'successfully received access token not from cache');
+    const voices = await getTtsVoices({vendor: 'verbio', credentials});
+    t.ok(voices && voices.length != 0, 'successfully received verbio voices');
+  } catch (err) {
+    console.error(err);
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('IBM - create access key', async(t) => {
   const fn = require('..');
   const {client, getIbmAccessToken} = fn(opts, logger);
