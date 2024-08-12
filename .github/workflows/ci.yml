@@ -13,6 +13,11 @@ jobs:
         with:
           node-version: lts/*
       - run: npm install
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
       - run: npm run jslint
       - run: sudo apt update && sudo apt install -y squid
       - run: sudo cp test/squid.conf /etc/squid/squid.conf
