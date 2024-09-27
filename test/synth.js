@@ -603,7 +603,7 @@ const testPlayHT = async(t, voice_engine) => {
           text_guidance: 1,
         })
       },
-      language: 'en-US',
+      language: 'english',
       voice: 's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json',
       text,
       renderForCaching: true
