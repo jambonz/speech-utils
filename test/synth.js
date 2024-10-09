@@ -574,9 +574,9 @@ test('Elevenlabs speech synth tests', async(t) => {
     t.end(err);
   }
   client.quit();
-})
+});
 
-test('PlayHT speech synth tests', async(t) => {
+const testPlayHT = async(t, voice_engine) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
 
@@ -584,26 +584,26 @@ test('PlayHT speech synth tests', async(t) => {
     t.pass('skipping PlayHT speech synth tests since PLAYHT_API_KEY or PLAYHT_USER_ID is/are not provided');
     return t.end();
   }
-  const text = 'Hi there and welcome to jambones!';
+  const text = 'Hi there and welcome to jambones! ' + Date.now();
   try {
-    let opts = await synthAudio(stats, {
+    const opts = await synthAudio(stats, {
       vendor: 'playht',
       credentials: {
         api_key: process.env.PLAYHT_API_KEY,
         user_id: process.env.PLAYHT_USER_ID,
-        voice_engine: 'PlayHT2.0-turbo',
+        voice_engine,
         options: JSON.stringify({
-          quality: "medium",
+          quality: 'medium',
           speed: 1,
           seed: 1,
           temperature: 1,
-          emotion: "female_happy",
+          emotion: 'female_happy',
           voice_guidance: 3,
           style_guidance: 20,
           text_guidance: 1,
         })
       },
-      language: 'en-US',
+      language: 'english',
       voice: 's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json',
       text,
       renderForCaching: true
@@ -615,6 +615,14 @@ test('PlayHT speech synth tests', async(t) => {
     t.end(err);
   }
   client.quit();
+};
+
+test('PlayHT speech synth tests', async(t) => {
+  await testPlayHT(t, 'PlayHT2.0-turbo');
+});
+
+test('PlayHT3.0 speech synth tests', async(t) => {
+  await testPlayHT(t, 'Play3.0');
 });
 
 test('rimelabs speech synth tests', async(t) => {
