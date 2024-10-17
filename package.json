@@ -29,7 +29,7 @@
     "@aws-sdk/client-polly": "^3.496.0",
     "@aws-sdk/client-sts": "^3.496.0",
     "@google-cloud/text-to-speech": "^5.0.2",
-    "@grpc/grpc-js": "^1.9.14",
+    "@grpc/grpc-js": "^1.11.1",
     "@jambonz/realtimedb-helpers": "^0.8.7",
     "bent": "^7.3.12",
     "debug": "^4.3.4",
