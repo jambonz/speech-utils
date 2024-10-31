@@ -91,14 +91,17 @@ test('Google speech Custom voice synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
 
-  if (!process.env.GCP_CUSTOM_VOICE_FILE && !process.env.GCP_CUSTOM_VOICE_JSON_KEY || !process.env.GCP_CUSTOM_VOICE_MODEL) {
-    t.pass('skipping google speech synth tests since neither GCP_CUSTOM_VOICE_FILE nor GCP_CUSTOM_VOICE_JSON_KEY provided, GCP_CUSTOM_VOICE_MODEL is not provided');
+  if (!process.env.GCP_CUSTOM_VOICE_FILE &&
+    !process.env.GCP_CUSTOM_VOICE_JSON_KEY ||
+    !process.env.GCP_CUSTOM_VOICE_MODEL) {
+    t.pass(`skipping google speech synth tests since neither 
+GCP_CUSTOM_VOICE_FILE nor GCP_CUSTOM_VOICE_JSON_KEY provided, GCP_CUSTOM_VOICE_MODEL is not provided`);
     return t.end();
   }
   try {
     const str = process.env.GCP_CUSTOM_VOICE_JSON_KEY || fs.readFileSync(process.env.GCP_CUSTOM_VOICE_FILE);
     const creds = JSON.parse(str);
-    let opts = await synthAudio(stats, {
+    const opts = await synthAudio(stats, {
       vendor: 'google',
       credentials: {
         credentials: {
@@ -109,11 +112,53 @@ test('Google speech Custom voice synth tests', async(t) => {
       language: 'en-AU',
       text: 'This is a test.  This is only a test',
       voice: {
-        reportedUsage:"REALTIME",
+        reportedUsage: 'REALTIME',
         model: process.env.GCP_CUSTOM_VOICE_MODEL
       }
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google custom voice audio to ${opts.filePath}`);
+  } catch (err) {
+    console.error(err);
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('Google speech voice cloning synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.GCP_CUSTOM_VOICE_FILE &&
+    !process.env.GCP_CUSTOM_VOICE_JSON_KEY ||
+    !process.env.GCP_VOICE_CLONING_FILE &&
+    !process.env.GCP_VOICE_CLONING_JSON_KEY) {
+    t.pass(`skipping google speech synth tests since neither 
+GCP_CUSTOM_VOICE_FILE nor GCP_CUSTOM_VOICE_JSON_KEY provided,
+GCP_VOICE_CLONING_FILE nor GCP_VOICE_CLONING_JSON_KEY is not provided`);
+    return t.end();
+  }
+  try {
+    const googleKey = process.env.GCP_CUSTOM_VOICE_JSON_KEY ||
+      fs.readFileSync(process.env.GCP_CUSTOM_VOICE_FILE);
+    const voice_cloning_key = process.env.GCP_VOICE_CLONING_JSON_KEY ||
+      fs.readFileSync(process.env.GCP_VOICE_CLONING_FILE).toString();
+    const creds = JSON.parse(googleKey);
+    const opts = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+          project_id: creds.project_id
+        },
+      },
+      language: 'en-US',
+      text: 'This is a test. This is only a test. This is a test. This is only a test. This is a test. This is only a test',
+      voice: {
+        voice_cloning_key
+      }
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized google voice cloning audio to ${opts.filePath}`);
   } catch (err) {
     console.error(err);
     t.end(err);
