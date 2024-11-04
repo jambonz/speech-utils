@@ -554,12 +554,28 @@ test('Custom Vendor speech synth tests', async(t) => {
       text: 'This is a test.  This is only a test',
     });
     t.ok(!opts.servedFromCache, `successfully synthesized custom vendor audio to ${opts.filePath}`);
+    t.ok(opts.filePath.endsWith('wav'), 'audio is cached as wav file');
     let obj = await getJSON(`http://127.0.0.1:3100/lastRequest/somethingnew`);
     t.ok(obj.headers.Authorization == 'Bearer some_jwt_token', 'Custom Vendor Authentication Header is correct');
     t.ok(obj.body.language == 'en-US', 'Custom Vendor Language is correct');
     t.ok(obj.body.voice == 'English-US.Female-1', 'Custom Vendor voice is correct');
     t.ok(obj.body.type == 'text', 'Custom Vendor type is correct');
     t.ok(obj.body.text == 'This is a test.  This is only a test', 'Custom Vendor text is correct');
+
+    // Checking if cache is stored with wav format
+    opts = await synthAudio(stats, {
+      vendor: 'custom:somethingnew',
+      credentials: {
+        use_for_tts: 1,
+        custom_tts_url: "http://127.0.0.1:3100/somethingnew",
+        auth_token: 'some_jwt_token'
+      },
+      language: 'en-US',
+      voice: 'English-US.Female-1',
+      text: 'This is a test.  This is only a test',
+    });
+    t.ok(opts.servedFromCache, `successfully get custom vendor cached audio to ${opts.filePath}`);
+    t.ok(opts.filePath.endsWith('wav'), 'audio is cached as wav file');
 
     opts = await synthAudio(stats, {
       vendor: 'custom:somethingnew2',
