@@ -686,6 +686,40 @@ test('PlayHT3.0 speech synth tests', async(t) => {
   await testPlayHT(t, 'Play3.0');
 });
 
+test('Cartesia speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.CARTESIA_API_KEY) {
+    t.pass('skipping Cartesia speech synth tests since CARTESIA_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambones! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'cartesia',
+      credentials: {
+        api_key: process.env.CARTESIA_API_KEY,
+        model_id: 'sonic-english',
+        options: JSON.stringify({
+          speed: 1,
+          emotion: 'female_happy',
+        })
+      },
+      language: 'en',
+      voice: '694f9389-aac1-45b6-b726-9d9369183238',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully playht eleven audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('rimelabs speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
