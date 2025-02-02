@@ -5,7 +5,7 @@ const fs = require('fs');
 const {makeSynthKey} = require('../lib/utils');
 const logger = require('pino')();
 const bent = require('bent');
-const getJSON = bent('json')
+const getJSON = bent('json');
 
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
@@ -853,11 +853,11 @@ test('TTS Cache tests', async(t) => {
     // save some random tts keys to cache
     const minRecords = 8;
     for (const i in Array(minRecords).fill(0)) {
-      await client.set(makeSynthKey({vendor: i, language: i, voice: i, engine: i, text: i}), i);
+      await client.set(makeSynthKey({vendor: i, language: i, voice: i, engine: i, model: i, text: i}), i);
     }
     const count = await getTtsSize();
     t.ok(count >= minRecords, 'getTtsSize worked.');
-    
+
     const {purgedCount} = await purgeTtsCache();
     t.ok(purgedCount >= minRecords, `successfully purged at least ${minRecords} tts records from cache`);
 
