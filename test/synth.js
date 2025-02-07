@@ -720,7 +720,7 @@ test('Cartesia speech synth tests', async(t) => {
   client.quit();
 });
 
-test('rimelabs speech synth tests', async(t) => {
+test('rimelabs speech synth tests mist', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
 
@@ -730,7 +730,7 @@ test('rimelabs speech synth tests', async(t) => {
   }
   const text = 'Hi there and welcome to jambones!';
   try {
-    let opts = await synthAudio(stats, {
+    const opts = await synthAudio(stats, {
       vendor: 'rimelabs',
       credentials: {
         api_key: process.env.RIMELABS_API_KEY,
@@ -740,12 +740,46 @@ test('rimelabs speech synth tests', async(t) => {
           reduceLatency: false
         })
       },
-      language: 'en-US',
+      language: 'eng',
       voice: 'amber',
       text,
       renderForCaching: true
     });
     t.ok(!opts.servedFromCache, `successfully synthesized rimelabs audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('rimelabs speech synth tests mistv2', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.RIMELABS_API_KEY) {
+    t.pass('skipping rimelabs speech synth tests since RIMELABS_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambones!';
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'rimelabs',
+      credentials: {
+        api_key: process.env.RIMELABS_API_KEY,
+        model_id: 'mistv2',
+        options: JSON.stringify({
+          speedAlpha: 1.0,
+          reduceLatency: false
+        })
+      },
+      language: 'spa',
+      voice: 'pablo',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized rimelabs mistv2 audio to ${opts.filePath}`);
 
   } catch (err) {
     console.error(JSON.stringify(err));
