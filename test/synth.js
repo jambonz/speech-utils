@@ -887,7 +887,8 @@ test('TTS Cache tests', async(t) => {
     // save some random tts keys to cache
     const minRecords = 8;
     for (const i in Array(minRecords).fill(0)) {
-      await client.set(makeSynthKey({vendor: i, language: i, voice: i, engine: i, model: i, text: i}), i);
+      await client.set(makeSynthKey({vendor: i, language: i, voice: i, engine: i, model: i, text: i,
+        instructions: i}), i);
     }
     const count = await getTtsSize();
     t.ok(count >= minRecords, 'getTtsSize worked.');
@@ -906,7 +907,7 @@ test('TTS Cache tests', async(t) => {
   try {
     // save some random tts keys to cache
     for (const i in Array(10).fill(0)) {
-      await client.set(makeSynthKey({vendor: i, language: i, voice: i, engine: i, text: i}), i);
+      await client.set(makeSynthKey({vendor: i, language: i, voice: i, engine: i, text: i, instructions: i}), i);
     }
     // save a specific key to tts cache
     const opts = {vendor: 'aws', language: 'en-US', voice: 'MALE', engine: 'Engine', text: 'Hello World!'};
@@ -944,10 +945,10 @@ test('TTS Cache tests', async(t) => {
     const account_sid = "12412512_cabc_5aff"
     const account_sid2 = "22412512_cabc_5aff"
     for (const i in Array(minRecords).fill(0)) {
-      await client.set(makeSynthKey({account_sid, vendor: i, language: i, voice: i, engine: i, text: i}), i);
+      await client.set(makeSynthKey({account_sid, vendor: i, language: i, voice: i, engine: i, text: i, instructions: i}), i);
     }
     for (const i in Array(minRecords).fill(0)) {
-      await client.set(makeSynthKey({account_sid: account_sid2, vendor: i, language: i, voice: i, engine: i, text: i}), i);
+      await client.set(makeSynthKey({account_sid: account_sid2, vendor: i, language: i, voice: i, engine: i, text: i, instructions: i}), i);
     }
     const {purgedCount} = await purgeTtsCache({account_sid});
     t.equal(purgedCount, minRecords, `successfully purged at least ${minRecords} tts records from cache for account_sid:${account_sid}`);

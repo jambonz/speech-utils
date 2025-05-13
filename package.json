@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/jambonz/speech-utils#readme",
   "dependencies": {
+    "23": "^0.0.0",
     "@aws-sdk/client-polly": "^3.496.0",
     "@aws-sdk/client-sts": "^3.496.0",
     "@cartesia/cartesia-js": "^2.1.0",
@@ -38,7 +39,7 @@
     "google-protobuf": "^3.21.2",
     "ibm-watson": "^8.0.0",
     "microsoft-cognitiveservices-speech-sdk": "1.38.0",
-    "openai": "^4.25.0",
+    "openai": "^4.98.0",
     "undici": "^7.5.0"
   },
   "devDependencies": {
