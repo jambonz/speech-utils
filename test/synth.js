@@ -720,6 +720,36 @@ test('Cartesia speech synth tests', async(t) => {
   client.quit();
 });
 
+test('inworld speech synth', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.INWORLD_API_KEY) {
+    t.pass('skipping inworld speech synth tests since INWORLD_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambones!';
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'inworld',
+      credentials: {
+        api_key: process.env.INWORLD_API_KEY,
+        model_id: 'inworld-tts-1'
+      },
+      language: 'en',
+      voice: 'Ashley',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized inworld audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('rimelabs speech synth tests mist', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
