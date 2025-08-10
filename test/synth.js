@@ -750,6 +750,35 @@ test('inworld speech synth', async(t) => {
   client.quit();
 });
 
+test('resemble speech synth', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.RESEMBLE_API_KEY) {
+    t.pass('skipping resemble speech synth tests since RESEMBLE_API_KEY is not provided');
+    return t.end();
+  }
+  const text = '<speak prompt="Speak in an excited, upbeat tone">Hello from Resemble!</speak>';
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'resemble',
+      credentials: {
+        api_key: process.env.RESEMBLE_API_KEY,
+      },
+      language: 'en',
+      voice: '3f5fb9f1',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized resemble audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('rimelabs speech synth tests mist', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
