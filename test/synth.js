@@ -185,6 +185,7 @@ test('AWS speech synth tests', async(t) => {
       language: 'en-US',
       voice: 'Joey',
       text: 'This is a test.  This is only a test',
+      renderForCaching: true,
     });
     t.ok(!opts.servedFromCache, `successfully synthesized aws audio to ${opts.filePath}`);
 
@@ -198,6 +199,7 @@ test('AWS speech synth tests', async(t) => {
       language: 'en-US',
       voice: 'Joey',
       text: 'This is a test.  This is only a test',
+      renderForCaching: true,
     });
     t.ok(opts.servedFromCache, `successfully retrieved aws audio from cache ${opts.filePath}`);
   } catch (err) {
