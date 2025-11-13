@@ -716,7 +716,7 @@ test('Cartesia speech synth tests', async(t) => {
       text,
       renderForCaching: true
     });
-    t.ok(!opts.servedFromCache, `successfully playht eleven audio to ${opts.filePath}`);
+    t.ok(!opts.servedFromCache, `successfully cartesia eleven audio to ${opts.filePath}`);
 
   } catch (err) {
     console.error(JSON.stringify(err));
