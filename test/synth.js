@@ -179,7 +179,7 @@ test('Google Gemini TTS synth tests', async(t) => {
     const creds = JSON.parse(str);
     const geminiModel = process.env.GCP_GEMINI_TTS_MODEL || 'gemini-2.5-flash-tts';
 
-    // Test basic Gemini TTS synthesis
+    // Test Gemini TTS with model and instructions (both required for Gemini)
     let result = await synthAudio(stats, {
       vendor: 'google',
       credentials: {
@@ -187,17 +187,17 @@ test('Google Gemini TTS synth tests', async(t) => {
           client_email: creds.client_email,
           private_key: creds.private_key,
         },
-        use_gemini_tts: true
       },
       language: 'en-US',
       voice: 'Kore',
       model: geminiModel,
       text: 'Hello, this is a test of Google Gemini text to speech.',
+      instructions: 'Speak clearly and naturally.',
     });
     t.ok(!result.servedFromCache, `successfully synthesized Google Gemini TTS audio to ${result.filePath}`);
-    t.ok(result.filePath.endsWith('.r24'), 'Gemini TTS audio file has correct extension');
+    t.ok(result.filePath.endsWith('.wav'), 'Gemini TTS audio file has correct extension');
 
-    // Test Gemini TTS with instructions (prompt)
+    // Test Gemini TTS with different voice and instructions
     result = await synthAudio(stats, {
       vendor: 'google',
       credentials: {
@@ -205,7 +205,6 @@ test('Google Gemini TTS synth tests', async(t) => {
           client_email: creds.client_email,
           private_key: creds.private_key,
         },
-        use_gemini_tts: true
       },
       language: 'en-US',
       voice: 'Charon',
@@ -223,12 +222,12 @@ test('Google Gemini TTS synth tests', async(t) => {
           client_email: creds.client_email,
           private_key: creds.private_key,
         },
-        use_gemini_tts: true
       },
       language: 'en-US',
       voice: 'Kore',
       model: geminiModel,
       text: 'Hello, this is a test of Google Gemini text to speech.',
+      instructions: 'Speak clearly and naturally.',
     });
     t.ok(result.servedFromCache, `successfully retrieved Gemini TTS audio from cache ${result.filePath}`);
 
@@ -240,12 +239,12 @@ test('Google Gemini TTS synth tests', async(t) => {
           client_email: creds.client_email,
           private_key: creds.private_key,
         },
-        use_gemini_tts: true
       },
       language: 'en-US',
       voice: 'Leda',
       model: geminiModel,
       text: '<speak>This SSML should be stripped for Gemini TTS.</speak>',
+      instructions: 'Speak naturally.',
       disableTtsCache: true
     });
     t.ok(!result.servedFromCache, `successfully synthesized Gemini TTS with SSML stripped to ${result.filePath}`);
