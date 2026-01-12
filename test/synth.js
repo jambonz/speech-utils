@@ -195,7 +195,7 @@ test('Google Gemini TTS synth tests', async(t) => {
       instructions: 'Speak clearly and naturally.',
     });
     t.ok(!result.servedFromCache, `successfully synthesized Google Gemini TTS audio to ${result.filePath}`);
-    t.ok(result.filePath.endsWith('.wav'), 'Gemini TTS audio file has correct extension');
+    t.ok(result.filePath.endsWith('.mp3'), 'Gemini TTS audio file has correct extension');
 
     // Test Gemini TTS with different voice and instructions
     result = await synthAudio(stats, {
