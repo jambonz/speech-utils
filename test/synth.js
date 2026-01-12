@@ -132,7 +132,7 @@ test('Google speech voice cloning synth tests', async(t) => {
     !process.env.GCP_CUSTOM_VOICE_JSON_KEY ||
     !process.env.GCP_VOICE_CLONING_FILE &&
     !process.env.GCP_VOICE_CLONING_JSON_KEY) {
-    t.pass(`skipping google speech synth tests since neither 
+    t.pass(`skipping google speech synth tests since neither
 GCP_CUSTOM_VOICE_FILE nor GCP_CUSTOM_VOICE_JSON_KEY provided,
 GCP_VOICE_CLONING_FILE nor GCP_VOICE_CLONING_JSON_KEY is not provided`);
     return t.end();
@@ -159,6 +159,97 @@ GCP_VOICE_CLONING_FILE nor GCP_VOICE_CLONING_JSON_KEY is not provided`);
       }
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google voice cloning audio to ${opts.filePath}`);
+  } catch (err) {
+    console.error(err);
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('Google Gemini TTS synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.GCP_FILE && !process.env.GCP_JSON_KEY) {
+    t.pass('skipping Google Gemini TTS synth tests since neither GCP_FILE nor GCP_JSON_KEY provided');
+    return t.end();
+  }
+  try {
+    const str = process.env.GCP_JSON_KEY || fs.readFileSync(process.env.GCP_FILE);
+    const creds = JSON.parse(str);
+    const geminiModel = process.env.GCP_GEMINI_TTS_MODEL || 'gemini-2.5-flash-tts';
+
+    // Test basic Gemini TTS synthesis
+    let result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+        use_gemini_tts: true
+      },
+      language: 'en-US',
+      voice: 'Kore',
+      model: geminiModel,
+      text: 'Hello, this is a test of Google Gemini text to speech.',
+    });
+    t.ok(!result.servedFromCache, `successfully synthesized Google Gemini TTS audio to ${result.filePath}`);
+    t.ok(result.filePath.endsWith('.r24'), 'Gemini TTS audio file has correct extension');
+
+    // Test Gemini TTS with instructions (prompt)
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+        use_gemini_tts: true
+      },
+      language: 'en-US',
+      voice: 'Charon',
+      model: geminiModel,
+      text: 'Welcome to our service. How can I help you today?',
+      instructions: 'Speak in a warm, friendly and professional tone.',
+    });
+    t.ok(!result.servedFromCache, `successfully synthesized Gemini TTS with instructions to ${result.filePath}`);
+
+    // Test cache retrieval
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+        use_gemini_tts: true
+      },
+      language: 'en-US',
+      voice: 'Kore',
+      model: geminiModel,
+      text: 'Hello, this is a test of Google Gemini text to speech.',
+    });
+    t.ok(result.servedFromCache, `successfully retrieved Gemini TTS audio from cache ${result.filePath}`);
+
+    // Test SSML stripping (Gemini doesn't support SSML)
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+        use_gemini_tts: true
+      },
+      language: 'en-US',
+      voice: 'Leda',
+      model: geminiModel,
+      text: '<speak>This SSML should be stripped for Gemini TTS.</speak>',
+      disableTtsCache: true
+    });
+    t.ok(!result.servedFromCache, `successfully synthesized Gemini TTS with SSML stripped to ${result.filePath}`);
+
   } catch (err) {
     console.error(err);
     t.end(err);
