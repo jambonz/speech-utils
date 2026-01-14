@@ -306,6 +306,9 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
     t.ok(result.filePath.includes('vendor=google'), 'Standard voice streaming path contains vendor=google');
     t.ok(result.filePath.includes('use_live_api=0'), 'Standard voice uses use_live_api=0');
     t.ok(result.filePath.includes('voice=en-US-Wavenet-D'), 'Standard voice streaming path contains voice');
+    // Verify credentials are base64 encoded (no raw JSON braces that would break FreeSWitch parsing)
+    t.ok(result.filePath.includes('credentials='), 'Standard voice streaming path contains credentials');
+    t.ok(!result.filePath.includes('credentials={'), 'Credentials are not raw JSON (base64 encoded)');
 
     // Test 2: HD voice streaming (use_live_api=1)
     result = await synthAudio(stats, {
