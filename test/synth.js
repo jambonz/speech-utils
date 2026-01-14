@@ -41,6 +41,7 @@ test('Google speech synth tests', async(t) => {
       gender: 'FEMALE',
       text: 'This is a test.  This is only a test',
       salt: 'foo.bar',
+      renderForCaching: true,
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google audio to ${opts.filePath}`);
 
@@ -55,6 +56,7 @@ test('Google speech synth tests', async(t) => {
       language: 'en-GB',
       gender: 'FEMALE',
       text: 'This is a test.  This is only a test',
+      renderForCaching: true,
     });
     t.ok(opts.servedFromCache, `successfully retrieved cached google audio from ${opts.filePath}`);
 
@@ -78,6 +80,7 @@ test('Google speech synth tests', async(t) => {
       language: 'en-GB',
       gender: 'FEMALE',
       text: 'This is a test.  This is only a test',
+      renderForCaching: true,
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google audio regardless of current cache to ${opts.filePath}`);
   } catch (err) {
@@ -114,7 +117,8 @@ GCP_CUSTOM_VOICE_FILE nor GCP_CUSTOM_VOICE_JSON_KEY provided, GCP_CUSTOM_VOICE_M
       voice: {
         reportedUsage: 'REALTIME',
         model: process.env.GCP_CUSTOM_VOICE_MODEL
-      }
+      },
+      renderForCaching: true,
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google custom voice audio to ${opts.filePath}`);
   } catch (err) {
@@ -156,7 +160,8 @@ GCP_VOICE_CLONING_FILE nor GCP_VOICE_CLONING_JSON_KEY is not provided`);
       text: 'This is a test. This is only a test. This is a test. This is only a test. This is a test. This is only a test',
       voice: {
         voice_cloning_key
-      }
+      },
+      renderForCaching: true,
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google voice cloning audio to ${opts.filePath}`);
   } catch (err) {
@@ -193,6 +198,7 @@ test('Google Gemini TTS synth tests', async(t) => {
       model: geminiModel,
       text: 'Hello, this is a test of Google Gemini text to speech.',
       instructions: 'Speak clearly and naturally.',
+      renderForCaching: true,
     });
     t.ok(!result.servedFromCache, `successfully synthesized Google Gemini TTS audio to ${result.filePath}`);
     t.ok(result.filePath.endsWith('.mp3'), 'Gemini TTS audio file has correct extension');
@@ -211,6 +217,7 @@ test('Google Gemini TTS synth tests', async(t) => {
       model: geminiModel,
       text: 'Welcome to our service. How can I help you today?',
       instructions: 'Speak in a warm, friendly and professional tone.',
+      renderForCaching: true,
     });
     t.ok(!result.servedFromCache, `successfully synthesized Gemini TTS with instructions to ${result.filePath}`);
 
@@ -228,6 +235,7 @@ test('Google Gemini TTS synth tests', async(t) => {
       model: geminiModel,
       text: 'Hello, this is a test of Google Gemini text to speech.',
       instructions: 'Speak clearly and naturally.',
+      renderForCaching: true,
     });
     t.ok(result.servedFromCache, `successfully retrieved Gemini TTS audio from cache ${result.filePath}`);
 
@@ -245,7 +253,8 @@ test('Google Gemini TTS synth tests', async(t) => {
       model: geminiModel,
       text: '<speak>This SSML should be stripped for Gemini TTS.</speak>',
       instructions: 'Speak naturally.',
-      disableTtsCache: true
+      disableTtsCache: true,
+      renderForCaching: true,
     });
     t.ok(!result.servedFromCache, `successfully synthesized Gemini TTS with SSML stripped to ${result.filePath}`);
 
