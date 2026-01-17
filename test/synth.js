@@ -347,7 +347,7 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
     });
     t.ok(result.filePath.startsWith('say:'), 'Gemini TTS returns streaming say: path');
     t.ok(result.filePath.includes('vendor=google'), 'Gemini TTS streaming path contains vendor=google');
-    t.ok(result.filePath.includes('use_live_api=0'), 'Gemini TTS uses use_live_api=1 (Live API)');
+    t.ok(result.filePath.includes('use_live_api=1'), 'Gemini TTS uses use_live_api=1 (Live API)');
     t.ok(result.filePath.includes(`model_name=${geminiModel}`), 'Gemini TTS streaming path contains model_name');
     t.ok(result.filePath.includes('prompt=Speak naturally.'), 'Gemini TTS streaming path contains prompt');
 
