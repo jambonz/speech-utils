@@ -305,6 +305,7 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
     t.ok(result.filePath.startsWith('say:'), 'Standard voice returns streaming say: path');
     t.ok(result.filePath.includes('vendor=google'), 'Standard voice streaming path contains vendor=google');
     t.ok(result.filePath.includes('use_live_api=0'), 'Standard voice uses use_live_api=0');
+    t.ok(result.filePath.includes('use_gemini_tts=0'), 'Standard voice uses use_gemini_tts=0');
     t.ok(result.filePath.includes('voice=en-US-Wavenet-D'), 'Standard voice streaming path contains voice');
     // Verify credentials are base64 encoded (no raw JSON braces that would break FreeSWitch parsing)
     t.ok(result.filePath.includes('credentials='), 'Standard voice streaming path contains credentials');
@@ -327,6 +328,7 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
     t.ok(result.filePath.startsWith('say:'), 'HD voice returns streaming say: path');
     t.ok(result.filePath.includes('vendor=google'), 'HD voice streaming path contains vendor=google');
     t.ok(result.filePath.includes('use_live_api=1'), 'HD voice uses use_live_api=1 (Live API)');
+    t.ok(result.filePath.includes('use_gemini_tts=0'), 'HD voice uses use_gemini_tts=0');
     t.ok(result.filePath.includes('voice=en-US-Chirp3-HD-Charon'), 'HD voice streaming path contains voice');
 
     // Test 3: Gemini TTS streaming (use_live_api=1)
@@ -347,7 +349,8 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
     });
     t.ok(result.filePath.startsWith('say:'), 'Gemini TTS returns streaming say: path');
     t.ok(result.filePath.includes('vendor=google'), 'Gemini TTS streaming path contains vendor=google');
-    t.ok(result.filePath.includes('use_live_api=1'), 'Gemini TTS uses use_live_api=1 (Live API)');
+    t.ok(result.filePath.includes('use_live_api=0'), 'Gemini TTS uses use_live_api=0');
+    t.ok(result.filePath.includes('use_gemini_tts=1'), 'Gemini TTS uses use_gemini_tts=1');
     t.ok(result.filePath.includes(`model_name=${geminiModel}`), 'Gemini TTS streaming path contains model_name');
     t.ok(result.filePath.includes('prompt=Speak naturally.'), 'Gemini TTS streaming path contains prompt');
 
