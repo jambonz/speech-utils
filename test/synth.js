@@ -41,6 +41,7 @@ test('Google speech synth tests', async(t) => {
       gender: 'FEMALE',
       text: 'This is a test.  This is only a test',
       salt: 'foo.bar',
+      renderForCaching: true,
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google audio to ${opts.filePath}`);
 
@@ -55,6 +56,7 @@ test('Google speech synth tests', async(t) => {
       language: 'en-GB',
       gender: 'FEMALE',
       text: 'This is a test.  This is only a test',
+      renderForCaching: true,
     });
     t.ok(opts.servedFromCache, `successfully retrieved cached google audio from ${opts.filePath}`);
 
@@ -78,6 +80,7 @@ test('Google speech synth tests', async(t) => {
       language: 'en-GB',
       gender: 'FEMALE',
       text: 'This is a test.  This is only a test',
+      renderForCaching: true,
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google audio regardless of current cache to ${opts.filePath}`);
   } catch (err) {
@@ -114,7 +117,8 @@ GCP_CUSTOM_VOICE_FILE nor GCP_CUSTOM_VOICE_JSON_KEY provided, GCP_CUSTOM_VOICE_M
       voice: {
         reportedUsage: 'REALTIME',
         model: process.env.GCP_CUSTOM_VOICE_MODEL
-      }
+      },
+      renderForCaching: true,
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google custom voice audio to ${opts.filePath}`);
   } catch (err) {
@@ -132,7 +136,7 @@ test('Google speech voice cloning synth tests', async(t) => {
     !process.env.GCP_CUSTOM_VOICE_JSON_KEY ||
     !process.env.GCP_VOICE_CLONING_FILE &&
     !process.env.GCP_VOICE_CLONING_JSON_KEY) {
-    t.pass(`skipping google speech synth tests since neither 
+    t.pass(`skipping google speech synth tests since neither
 GCP_CUSTOM_VOICE_FILE nor GCP_CUSTOM_VOICE_JSON_KEY provided,
 GCP_VOICE_CLONING_FILE nor GCP_VOICE_CLONING_JSON_KEY is not provided`);
     return t.end();
@@ -156,12 +160,387 @@ GCP_VOICE_CLONING_FILE nor GCP_VOICE_CLONING_JSON_KEY is not provided`);
       text: 'This is a test. This is only a test. This is a test. This is only a test. This is a test. This is only a test',
       voice: {
         voice_cloning_key
-      }
+      },
+      renderForCaching: true,
     });
     t.ok(!opts.servedFromCache, `successfully synthesized google voice cloning audio to ${opts.filePath}`);
   } catch (err) {
     console.error(err);
     t.end(err);
+  }
+  client.quit();
+});
+
+test('Google Gemini TTS synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.GCP_FILE && !process.env.GCP_JSON_KEY) {
+    t.pass('skipping Google Gemini TTS synth tests since neither GCP_FILE nor GCP_JSON_KEY provided');
+    return t.end();
+  }
+  try {
+    const str = process.env.GCP_JSON_KEY || fs.readFileSync(process.env.GCP_FILE);
+    const creds = JSON.parse(str);
+    const geminiModel = process.env.GCP_GEMINI_TTS_MODEL || 'gemini-2.5-flash-tts';
+
+    // Test Gemini TTS with model and instructions (both required for Gemini)
+    let result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'Kore',
+      model: geminiModel,
+      text: 'Hello, this is a test of Google Gemini text to speech.',
+      instructions: 'Speak clearly and naturally.',
+      renderForCaching: true,
+    });
+    t.ok(!result.servedFromCache, `successfully synthesized Google Gemini TTS audio to ${result.filePath}`);
+    t.ok(result.filePath.endsWith('.mp3'), 'Gemini TTS audio file has correct extension');
+
+    // Test Gemini TTS with different voice and instructions
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'Charon',
+      model: geminiModel,
+      text: 'Welcome to our service. How can I help you today?',
+      instructions: 'Speak in a warm, friendly and professional tone.',
+      renderForCaching: true,
+    });
+    t.ok(!result.servedFromCache, `successfully synthesized Gemini TTS with instructions to ${result.filePath}`);
+
+    // Test cache retrieval
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'Kore',
+      model: geminiModel,
+      text: 'Hello, this is a test of Google Gemini text to speech.',
+      instructions: 'Speak clearly and naturally.',
+      renderForCaching: true,
+    });
+    t.ok(result.servedFromCache, `successfully retrieved Gemini TTS audio from cache ${result.filePath}`);
+
+    // Test SSML stripping (Gemini doesn't support SSML)
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'Leda',
+      model: geminiModel,
+      text: '<speak>This SSML should be stripped for Gemini TTS.</speak>',
+      instructions: 'Speak naturally.',
+      disableTtsCache: true,
+      renderForCaching: true,
+    });
+    t.ok(!result.servedFromCache, `successfully synthesized Gemini TTS with SSML stripped to ${result.filePath}`);
+
+  } catch (err) {
+    console.error(err);
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) => {
+  // Ensure streaming is enabled (default behavior)
+  delete process.env.JAMBONES_DISABLE_TTS_STREAMING;
+
+  // Clear require cache to reload config with new env var
+  delete require.cache[require.resolve('../lib/config')];
+  delete require.cache[require.resolve('../lib/synth-audio')];
+  delete require.cache[require.resolve('..')];
+
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.GCP_FILE && !process.env.GCP_JSON_KEY) {
+    t.pass('skipping Google TTS streaming tests since neither GCP_FILE nor GCP_JSON_KEY provided');
+    return t.end();
+  }
+
+  try {
+    const str = process.env.GCP_JSON_KEY || fs.readFileSync(process.env.GCP_FILE);
+    const creds = JSON.parse(str);
+    const geminiModel = process.env.GCP_GEMINI_TTS_MODEL || 'gemini-2.5-flash-tts';
+
+    // Test 1: Standard voice streaming (use_live_api=0)
+    let result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'en-US-Wavenet-D',
+      gender: 'MALE',
+      text: 'This is a test of standard voice streaming.',
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.startsWith('say:'), 'Standard voice returns streaming say: path');
+    t.ok(result.filePath.includes('vendor=google'), 'Standard voice streaming path contains vendor=google');
+    t.ok(result.filePath.includes('use_live_api=0'), 'Standard voice uses use_live_api=0');
+    t.ok(result.filePath.includes('use_gemini_tts=0'), 'Standard voice uses use_gemini_tts=0');
+    t.ok(result.filePath.includes('voice=en-US-Wavenet-D'), 'Standard voice streaming path contains voice');
+    // Verify credentials are base64 encoded (no raw JSON braces that would break FreeSWitch parsing)
+    t.ok(result.filePath.includes('credentials='), 'Standard voice streaming path contains credentials');
+    t.ok(!result.filePath.includes('credentials={'), 'Credentials are not raw JSON (base64 encoded)');
+
+    // Test 2: HD voice streaming (use_live_api=1)
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'en-US-Chirp3-HD-Charon',
+      text: 'This is a test of HD voice streaming.',
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.startsWith('say:'), 'HD voice returns streaming say: path');
+    t.ok(result.filePath.includes('vendor=google'), 'HD voice streaming path contains vendor=google');
+    t.ok(result.filePath.includes('use_live_api=1'), 'HD voice uses use_live_api=1 (Live API)');
+    t.ok(result.filePath.includes('use_gemini_tts=0'), 'HD voice uses use_gemini_tts=0');
+    t.ok(result.filePath.includes('voice=en-US-Chirp3-HD-Charon'), 'HD voice streaming path contains voice');
+
+    // Test 3: Gemini TTS streaming (use_live_api=1)
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'Kore',
+      model: geminiModel,
+      text: 'This is a test of Gemini TTS streaming.',
+      instructions: 'Speak naturally.',
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.startsWith('say:'), 'Gemini TTS returns streaming say: path');
+    t.ok(result.filePath.includes('vendor=google'), 'Gemini TTS streaming path contains vendor=google');
+    t.ok(result.filePath.includes('use_live_api=0'), 'Gemini TTS uses use_live_api=0');
+    t.ok(result.filePath.includes('use_gemini_tts=1'), 'Gemini TTS uses use_gemini_tts=1');
+    t.ok(result.filePath.includes(`model_name=${geminiModel}`), 'Gemini TTS streaming path contains model_name');
+    t.ok(result.filePath.includes('prompt=Speak naturally.'), 'Gemini TTS streaming path contains prompt');
+
+    // Test 4: Gemini TTS with SSML stripping in streaming mode
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'Leda',
+      model: geminiModel,
+      text: '<speak>This SSML should be stripped.</speak>',
+      instructions: 'Speak naturally.',
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.startsWith('say:'), 'Gemini TTS with SSML returns streaming say: path');
+    t.ok(!result.filePath.includes('<speak>'), 'SSML tags are stripped from streaming path');
+    t.ok(result.filePath.includes('This SSML should be stripped.'), 'Text content is preserved after SSML stripping');
+
+    // Test 5: Gemini TTS with prompt containing special characters
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'Kore',
+      model: geminiModel,
+      text: 'Testing special characters in prompt.',
+      options: { prompt: 'Speak in a warm, friendly tone' },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.startsWith('say:'), 'Gemini TTS with special chars returns streaming say: path');
+    // Commas in prompt should be replaced with semicolons
+    t.ok(result.filePath.includes('prompt=Speak in a warm; friendly tone'), 'Commas in prompt are escaped to semicolons');
+
+    // Test 6: options.useLiveApi override (force live api on standard voice)
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'en-US-Wavenet-D',
+      text: 'Testing useLiveApi option override.',
+      options: { useLiveApi: true },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.includes('use_live_api=1'), 'options.useLiveApi=true overrides default for standard voice');
+    t.ok(result.filePath.includes('use_gemini_tts=0'), 'use_gemini_tts remains 0 for standard voice');
+
+    // Test 7: options.useGeminiTts override (force gemini tts without model)
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'Kore',
+      text: 'Testing useGeminiTts option override.',
+      options: { useGeminiTts: true },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.includes('use_gemini_tts=1'), 'options.useGeminiTts=true overrides default');
+    t.ok(result.filePath.includes('use_live_api=0'), 'use_live_api remains 0 without HD voice');
+
+    // Test 8: Both options override together
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'en-US-Wavenet-D',
+      text: 'Testing both options override.',
+      options: { useLiveApi: true, useGeminiTts: true },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.includes('use_live_api=1'), 'options.useLiveApi=true works with useGeminiTts');
+    t.ok(result.filePath.includes('use_gemini_tts=1'), 'options.useGeminiTts=true works with useLiveApi');
+
+  } catch (err) {
+    console.error(err);
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('Google TTS non-streaming tests (JAMBONES_DISABLE_TTS_STREAMING=true)', async(t) => {
+  // Enable streaming disable flag
+  process.env.JAMBONES_DISABLE_TTS_STREAMING = 'true';
+
+  // Clear require cache to reload config with new env var
+  delete require.cache[require.resolve('../lib/config')];
+  delete require.cache[require.resolve('../lib/synth-audio')];
+  delete require.cache[require.resolve('..')];
+
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.GCP_FILE && !process.env.GCP_JSON_KEY) {
+    t.pass('skipping Google TTS non-streaming tests since neither GCP_FILE nor GCP_JSON_KEY provided');
+    delete process.env.JAMBONES_DISABLE_TTS_STREAMING;
+    return t.end();
+  }
+
+  try {
+    const str = process.env.GCP_JSON_KEY || fs.readFileSync(process.env.GCP_FILE);
+    const creds = JSON.parse(str);
+    const geminiModel = process.env.GCP_GEMINI_TTS_MODEL || 'gemini-2.5-flash-tts';
+
+    // Test 1: Standard voice falls back to non-streaming API
+    let result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'en-US-Wavenet-D',
+      gender: 'MALE',
+      text: 'This is a test with streaming disabled.',
+      disableTtsCache: true
+    });
+    t.ok(!result.filePath.startsWith('say:'), 'Standard voice does NOT return streaming say: path when disabled');
+    t.ok(result.filePath.endsWith('.mp3'), 'Standard voice returns mp3 file path');
+
+    // Test 2: HD voice falls back to non-streaming API
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'en-US-Chirp3-HD-Charon',
+      text: 'This is a test of HD voice with streaming disabled.',
+      disableTtsCache: true
+    });
+    t.ok(!result.filePath.startsWith('say:'), 'HD voice does NOT return streaming say: path when disabled');
+    t.ok(result.filePath.endsWith('.mp3'), 'HD voice returns mp3 file path');
+
+    // Test 3: Gemini TTS falls back to non-streaming API
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'Kore',
+      model: geminiModel,
+      text: 'This is a test of Gemini TTS with streaming disabled.',
+      instructions: 'Speak naturally.',
+      disableTtsCache: true
+    });
+    t.ok(!result.filePath.startsWith('say:'), 'Gemini TTS does NOT return streaming say: path when disabled');
+    t.ok(result.filePath.endsWith('.mp3'), 'Gemini TTS returns mp3 file path');
+
+  } catch (err) {
+    console.error(err);
+    t.end(err);
+  } finally {
+    // Clean up: restore default behavior
+    delete process.env.JAMBONES_DISABLE_TTS_STREAMING;
+    delete require.cache[require.resolve('../lib/config')];
+    delete require.cache[require.resolve('../lib/synth-audio')];
+    delete require.cache[require.resolve('..')];
   }
   client.quit();
 });
