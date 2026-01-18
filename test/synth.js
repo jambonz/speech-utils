@@ -394,6 +394,60 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
     // Commas in prompt should be replaced with semicolons
     t.ok(result.filePath.includes('prompt=Speak in a warm; friendly tone'), 'Commas in prompt are escaped to semicolons');
 
+    // Test 6: options.useLiveApi override (force live api on standard voice)
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'en-US-Wavenet-D',
+      text: 'Testing useLiveApi option override.',
+      options: { useLiveApi: true },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.includes('use_live_api=1'), 'options.useLiveApi=true overrides default for standard voice');
+    t.ok(result.filePath.includes('use_gemini_tts=0'), 'use_gemini_tts remains 0 for standard voice');
+
+    // Test 7: options.useGeminiTts override (force gemini tts without model)
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'Kore',
+      text: 'Testing useGeminiTts option override.',
+      options: { useGeminiTts: true },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.includes('use_gemini_tts=1'), 'options.useGeminiTts=true overrides default');
+    t.ok(result.filePath.includes('use_live_api=0'), 'use_live_api remains 0 without HD voice');
+
+    // Test 8: Both options override together
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: {
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+      },
+      language: 'en-US',
+      voice: 'en-US-Wavenet-D',
+      text: 'Testing both options override.',
+      options: { useLiveApi: true, useGeminiTts: true },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.includes('use_live_api=1'), 'options.useLiveApi=true works with useGeminiTts');
+    t.ok(result.filePath.includes('use_gemini_tts=1'), 'options.useGeminiTts=true works with useLiveApi');
+
   } catch (err) {
     console.error(err);
     t.end(err);
