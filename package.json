@@ -43,7 +43,7 @@
     "undici": "^7.5.0"
   },
   "devDependencies": {
-    "config": "^3.3.11",
+    "config": "^4.2.0",
     "eslint": "^9.3.0",
     "eslint-plugin-promise": "^6.2.0",
     "husky": "^9.0.11",
