@@ -304,14 +304,13 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
     });
     t.ok(result.filePath.startsWith('say:'), 'Standard voice returns streaming say: path');
     t.ok(result.filePath.includes('vendor=google'), 'Standard voice streaming path contains vendor=google');
-    t.ok(result.filePath.includes('use_live_api=0'), 'Standard voice uses use_live_api=0');
-    t.ok(result.filePath.includes('use_gemini_tts=0'), 'Standard voice uses use_gemini_tts=0');
+    t.ok(result.filePath.includes('api_mode=tts'), 'Standard voice uses api_mode=tts');
     t.ok(result.filePath.includes('voice=en-US-Wavenet-D'), 'Standard voice streaming path contains voice');
     // Verify credentials are base64 encoded (no raw JSON braces that would break FreeSWitch parsing)
     t.ok(result.filePath.includes('credentials='), 'Standard voice streaming path contains credentials');
     t.ok(!result.filePath.includes('credentials={'), 'Credentials are not raw JSON (base64 encoded)');
 
-    // Test 2: HD voice streaming (use_live_api=1)
+    // Test 2: HD voice streaming (api_mode=live)
     result = await synthAudio(stats, {
       vendor: 'google',
       credentials: {
@@ -327,11 +326,10 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
     });
     t.ok(result.filePath.startsWith('say:'), 'HD voice returns streaming say: path');
     t.ok(result.filePath.includes('vendor=google'), 'HD voice streaming path contains vendor=google');
-    t.ok(result.filePath.includes('use_live_api=1'), 'HD voice uses use_live_api=1 (Live API)');
-    t.ok(result.filePath.includes('use_gemini_tts=0'), 'HD voice uses use_gemini_tts=0');
+    t.ok(result.filePath.includes('api_mode=live'), 'HD voice uses api_mode=live');
     t.ok(result.filePath.includes('voice=en-US-Chirp3-HD-Charon'), 'HD voice streaming path contains voice');
 
-    // Test 3: Gemini TTS streaming (use_live_api=1)
+    // Test 3: Gemini TTS streaming (api_mode=gemini)
     result = await synthAudio(stats, {
       vendor: 'google',
       credentials: {
@@ -349,8 +347,7 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
     });
     t.ok(result.filePath.startsWith('say:'), 'Gemini TTS returns streaming say: path');
     t.ok(result.filePath.includes('vendor=google'), 'Gemini TTS streaming path contains vendor=google');
-    t.ok(result.filePath.includes('use_live_api=0'), 'Gemini TTS uses use_live_api=0');
-    t.ok(result.filePath.includes('use_gemini_tts=1'), 'Gemini TTS uses use_gemini_tts=1');
+    t.ok(result.filePath.includes('api_mode=gemini'), 'Gemini TTS uses api_mode=gemini');
     t.ok(result.filePath.includes(`model_name=${geminiModel}`), 'Gemini TTS streaming path contains model_name');
     t.ok(result.filePath.includes('prompt=Speak naturally.'), 'Gemini TTS streaming path contains prompt');
 
@@ -394,7 +391,7 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
     // Commas in prompt should be replaced with semicolons
     t.ok(result.filePath.includes('prompt=Speak in a warm; friendly tone'), 'Commas in prompt are escaped to semicolons');
 
-    // Test 6: options.useLiveApi override (force live api on standard voice)
+    // Test 6: options.apiMode override (force live on standard voice)
     result = await synthAudio(stats, {
       vendor: 'google',
       credentials: {
@@ -405,14 +402,13 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
       },
       language: 'en-US',
       voice: 'en-US-Wavenet-D',
-      text: 'Testing useLiveApi option override.',
-      options: { useLiveApi: true },
+      text: 'Testing apiMode option override to live.',
+      options: { apiMode: 'live' },
       disableTtsCache: true
     });
-    t.ok(result.filePath.includes('use_live_api=1'), 'options.useLiveApi=true overrides default for standard voice');
-    t.ok(result.filePath.includes('use_gemini_tts=0'), 'use_gemini_tts remains 0 for standard voice');
+    t.ok(result.filePath.includes('api_mode=live'), 'options.apiMode=live overrides default for standard voice');
 
-    // Test 7: options.useGeminiTts override (force gemini tts without model)
+    // Test 7: options.apiMode override (force gemini without model)
     result = await synthAudio(stats, {
       vendor: 'google',
       credentials: {
@@ -423,14 +419,13 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
       },
       language: 'en-US',
       voice: 'Kore',
-      text: 'Testing useGeminiTts option override.',
-      options: { useGeminiTts: true },
+      text: 'Testing apiMode option override to gemini.',
+      options: { apiMode: 'gemini' },
       disableTtsCache: true
     });
-    t.ok(result.filePath.includes('use_gemini_tts=1'), 'options.useGeminiTts=true overrides default');
-    t.ok(result.filePath.includes('use_live_api=0'), 'use_live_api remains 0 without HD voice');
+    t.ok(result.filePath.includes('api_mode=gemini'), 'options.apiMode=gemini overrides default');
 
-    // Test 8: Both options override together
+    // Test 8: options.apiMode override (force tts on HD voice)
     result = await synthAudio(stats, {
       vendor: 'google',
       credentials: {
@@ -440,13 +435,12 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
         },
       },
       language: 'en-US',
-      voice: 'en-US-Wavenet-D',
-      text: 'Testing both options override.',
-      options: { useLiveApi: true, useGeminiTts: true },
+      voice: 'en-US-Chirp3-HD-Charon',
+      text: 'Testing apiMode option override to tts on HD voice.',
+      options: { apiMode: 'tts' },
       disableTtsCache: true
     });
-    t.ok(result.filePath.includes('use_live_api=1'), 'options.useLiveApi=true works with useGeminiTts');
-    t.ok(result.filePath.includes('use_gemini_tts=1'), 'options.useGeminiTts=true works with useLiveApi');
+    t.ok(result.filePath.includes('api_mode=tts'), 'options.apiMode=tts overrides HD voice default');
 
   } catch (err) {
     console.error(err);
