@@ -28,7 +28,7 @@
   "dependencies": {
     "23": "^0.0.0",
     "@aws-sdk/client-polly": "^3.496.0",
-    "@aws-sdk/client-sts": "^3.496.0",
+    "@aws-sdk/client-sts": "^3.974.0",
     "@cartesia/cartesia-js": "^2.2.7",
     "@google-cloud/text-to-speech": "^6.4.0",
     "@grpc/grpc-js": "^1.9.14",
