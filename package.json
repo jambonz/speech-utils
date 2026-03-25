@@ -1,6 +1,6 @@
 {
   "name": "@jambonz/speech-utils",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TTS-related speech utilities for jambonz",
   "main": "index.js",
   "author": "Dave Horton",
@@ -37,7 +37,6 @@
     "debug": "^4.3.4",
     "form-urlencoded": "^6.1.4",
     "google-protobuf": "^3.21.2",
-
     "microsoft-cognitiveservices-speech-sdk": "1.38.0",
     "openai": "^4.98.0",
     "undici": "^7.5.0"
