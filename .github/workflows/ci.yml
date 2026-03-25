@@ -13,11 +13,6 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
-      - name: Install Docker Compose
-        run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose --version
       - run: npm run jslint
       - run: sudo apt update && sudo apt install -y squid
       - run: sudo cp test/squid.conf /etc/squid/squid.conf
@@ -28,9 +23,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           GCP_JSON_KEY: ${{ secrets.GCP_JSON_KEY }}
-          IBM_API_KEY: ${{ secrets.IBM_API_KEY }}
-          IBM_TTS_API_KEY: ${{ secrets.IBM_TTS_API_KEY }}
-          IBM_TTS_REGION: ${{ secrets.IBM_TTS_REGION }}
+
           MICROSOFT_API_KEY: ${{ secrets.MICROSOFT_API_KEY }}
           MICROSOFT_REGION: ${{ secrets.MICROSOFT_REGION }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

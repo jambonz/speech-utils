@@ -872,46 +872,6 @@ test('Nvidia speech synth tests', async(t) => {
   client.quit();
 });
 
-test('IBM watson speech synth tests', async(t) => {
-  const fn = require('..');
-  const {synthAudio, client} = fn(opts, logger);
-
-  if (!process.env.IBM_TTS_API_KEY || !process.env.IBM_TTS_REGION) {
-    t.pass('skipping IBM Watson speech synth tests since IBM_TTS_API_KEY or IBM_TTS_API_KEY not provided');
-    return t.end();
-  }
-  const text = `<speak> Hi there and welcome to jambones! jambones is the <sub alias="seapass">CPaaS</sub> designed with the needs of communication service providers in mind. This is an example of simple text-to-speech, but there is so much more you can do. Try us out!</speak>`;
-  try {
-    let opts = await synthAudio(stats, {
-      vendor: 'ibm',
-      credentials: {
-        tts_api_key: process.env.IBM_TTS_API_KEY,
-        tts_region: process.env.IBM_TTS_REGION,
-      },
-      language: 'en-US',
-      voice: 'en-US_AllisonV2Voice',
-      text,
-    });
-    t.ok(!opts.servedFromCache, `successfully synthesized ibm audio to ${opts.filePath}`);
-
-    opts = await synthAudio(stats, {
-      vendor: 'ibm',
-      credentials: {
-        tts_api_key: process.env.IBM_TTS_API_KEY,
-        tts_region: process.env.IBM_TTS_REGION,
-      },
-      language: 'en-US',
-      voice: 'en-US_AllisonV2Voice',
-      text,
-    });
-    t.ok(opts.servedFromCache, `successfully retrieved ibm audio from cache ${opts.filePath}`);
-  } catch (err) {
-    console.error(JSON.stringify(err));
-    t.end(err);
-  }
-  client.quit();
-});
-
 test('Custom Vendor speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
