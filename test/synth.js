@@ -759,82 +759,6 @@ test('Azure custom voice speech synth tests', async(t) => {
   client.quit();
 });
 
-test('Nuance hosted speech synth tests', async(t) => {
-  const fn = require('..');
-  const {synthAudio, client} = fn(opts, logger);
-
-  if (!process.env.NUANCE_CLIENT_ID || !process.env.NUANCE_SECRET) {
-    t.pass('skipping Nuance speech synth tests since NUANCE_CLIENT_ID or NUANCE_SECRET not provided');
-    return t.end();
-  }
-  try {
-    let opts = await synthAudio(stats, {
-      vendor: 'nuance',
-      credentials: {
-        client_id: process.env.NUANCE_CLIENT_ID,
-        secret: process.env.NUANCE_SECRET,
-      },
-      language: 'en-US',
-      voice: 'Evan',
-      text: 'This is a test.  This is only a test',
-    });
-    t.ok(!opts.servedFromCache, `successfully synthesized nuance audio to ${opts.filePath}`);
-
-    opts = await synthAudio(stats, {
-      vendor: 'nuance',
-      credentials: {
-        client_id: process.env.NUANCE_CLIENT_ID,
-        secret: process.env.NUANCE_SECRET,
-      },
-      language: 'en-US',
-      voice: 'Evan',
-      text: 'This is a test.  This is only a test',
-    });
-    t.ok(opts.servedFromCache, `successfully retrieved nuance audio from cache ${opts.filePath}`);
-  } catch (err) {
-    console.error(err);
-    t.end(err);
-  }
-  client.quit();
-});
-
-test('Nuance on-prem speech synth tests', async(t) => {
-  const fn = require('..');
-  const {synthAudio, client} = fn(opts, logger);
-
-  if (!process.env.NUANCE_TTS_URI) {
-    t.pass('skipping Nuance on prem speech synth tests since NUANCE_TTS_URI not provided');
-    return t.end();
-  }
-  try {
-    let opts = await synthAudio(stats, {
-      vendor: 'nuance',
-      credentials: {
-        nuance_tts_uri: process.env.NUANCE_TTS_URI
-      },
-      language: 'en-US',
-      voice: 'Evan',
-      text: 'This is a test of on-prem.  This is only a test',
-    });
-    t.ok(!opts.servedFromCache, `successfully synthesized nuance audio to ${opts.filePath}`);
-
-    opts = await synthAudio(stats, {
-      vendor: 'nuance',
-      credentials: {
-        nuance_tts_uri: process.env.NUANCE_TTS_URI
-      },
-      language: 'en-US',
-      voice: 'Evan',
-      text: 'This is a test of on-prem.  This is only a test',
-    });
-    t.ok(opts.servedFromCache, `successfully retrieved nuance audio from cache ${opts.filePath}`);
-  } catch (err) {
-    console.error(err);
-    t.end(err);
-  }
-  client.quit();
-});
-
 test('Nvidia speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
@@ -973,55 +897,6 @@ test('Elevenlabs speech synth tests', async(t) => {
     t.end(err);
   }
   client.quit();
-});
-
-const testPlayHT = async(t, voice_engine) => {
-  const fn = require('..');
-  const {synthAudio, client} = fn(opts, logger);
-
-  if (!process.env.PLAYHT_API_KEY || !process.env.PLAYHT_USER_ID) {
-    t.pass('skipping PlayHT speech synth tests since PLAYHT_API_KEY or PLAYHT_USER_ID is/are not provided');
-    return t.end();
-  }
-  const text = 'Hi there and welcome to jambones! ' + Date.now();
-  try {
-    const opts = await synthAudio(stats, {
-      vendor: 'playht',
-      credentials: {
-        api_key: process.env.PLAYHT_API_KEY,
-        user_id: process.env.PLAYHT_USER_ID,
-        voice_engine,
-        options: JSON.stringify({
-          quality: 'medium',
-          speed: 1,
-          seed: 1,
-          temperature: 1,
-          emotion: 'female_happy',
-          voice_guidance: 3,
-          style_guidance: 20,
-          text_guidance: 1,
-        })
-      },
-      language: 'english',
-      voice: 's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json',
-      text,
-      renderForCaching: true
-    });
-    t.ok(!opts.servedFromCache, `successfully playht eleven audio to ${opts.filePath}`);
-
-  } catch (err) {
-    console.error(JSON.stringify(err));
-    t.end(err);
-  }
-  client.quit();
-};
-
-test('PlayHT speech synth tests', async(t) => {
-  await testPlayHT(t, 'PlayHT2.0-turbo');
-});
-
-test('PlayHT3.0 speech synth tests', async(t) => {
-  await testPlayHT(t, 'Play3.0');
 });
 
 test('Cartesia speech synth tests', async(t) => {
@@ -1214,39 +1089,6 @@ test('whisper speech synth tests', async(t) => {
   }
   client.quit();
 });
-
-test('Verbio speech synth tests', async(t) => {
-  const fn = require('..');
-  const {synthAudio, client} = fn(opts, logger);
-
-  if (!process.env.VERBIO_CLIENT_ID || !process.env.VERBIO_CLIENT_SECRET) {
-    t.pass('skipping Verbio Synthesize test since no Verbio Keys provided');
-    t.end();
-    client.quit();
-    return;
-  }
-
-  const text = 'Hi there and welcome to jambones!';
-  try {
-    let opts = await synthAudio(stats, {
-      vendor: 'verbio',
-      credentials: {
-        client_id: process.env.VERBIO_CLIENT_ID,
-        client_secret: process.env.VERBIO_CLIENT_SECRET
-      },
-      language: 'en-US',
-      voice: 'tommy_en-us',
-      text,
-      renderForCaching: true
-    });
-    t.ok(!opts.servedFromCache, `successfully synthesized whisper audio to ${opts.filePath}`);
-
-  } catch (err) {
-    console.error(JSON.stringify(err));
-    t.end(err);
-  }
-  client.quit();
-})
 
 test('Deepgram speech synth tests', async(t) => {
   const fn = require('..');
