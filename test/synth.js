@@ -899,55 +899,6 @@ test('Elevenlabs speech synth tests', async(t) => {
   client.quit();
 });
 
-const testPlayHT = async(t, voice_engine) => {
-  const fn = require('..');
-  const {synthAudio, client} = fn(opts, logger);
-
-  if (!process.env.PLAYHT_API_KEY || !process.env.PLAYHT_USER_ID) {
-    t.pass('skipping PlayHT speech synth tests since PLAYHT_API_KEY or PLAYHT_USER_ID is/are not provided');
-    return t.end();
-  }
-  const text = 'Hi there and welcome to jambones! ' + Date.now();
-  try {
-    const opts = await synthAudio(stats, {
-      vendor: 'playht',
-      credentials: {
-        api_key: process.env.PLAYHT_API_KEY,
-        user_id: process.env.PLAYHT_USER_ID,
-        voice_engine,
-        options: JSON.stringify({
-          quality: 'medium',
-          speed: 1,
-          seed: 1,
-          temperature: 1,
-          emotion: 'female_happy',
-          voice_guidance: 3,
-          style_guidance: 20,
-          text_guidance: 1,
-        })
-      },
-      language: 'english',
-      voice: 's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json',
-      text,
-      renderForCaching: true
-    });
-    t.ok(!opts.servedFromCache, `successfully playht eleven audio to ${opts.filePath}`);
-
-  } catch (err) {
-    console.error(JSON.stringify(err));
-    t.end(err);
-  }
-  client.quit();
-};
-
-test('PlayHT speech synth tests', async(t) => {
-  await testPlayHT(t, 'PlayHT2.0-turbo');
-});
-
-test('PlayHT3.0 speech synth tests', async(t) => {
-  await testPlayHT(t, 'Play3.0');
-});
-
 test('Cartesia speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
