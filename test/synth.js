@@ -1118,6 +1118,41 @@ test('Deepgram speech synth tests', async(t) => {
   client.quit();
 })
 
+test('xai speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.XAI_API_KEY) {
+    t.pass('skipping xai speech synth tests - no XAI_API_KEY');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambones!';
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'xai',
+      credentials: {
+        api_key: process.env.XAI_API_KEY,
+        options: JSON.stringify({
+          voice: process.env.XAI_VOICE || 'eve',
+          speed: 1.0,
+          optimize_streaming_latency: 1,
+          text_normalization: true
+        })
+      },
+      language: 'en',
+      voice: process.env.XAI_VOICE || 'eve',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache && opts.filePath, `successfully synthesized xai audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('TTS Cache tests', async(t) => {
   const fn = require('..');
   const {purgeTtsCache, getTtsSize, client} = fn(opts, logger);
