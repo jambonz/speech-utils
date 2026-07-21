@@ -1118,6 +1118,34 @@ test('Deepgram speech synth tests', async(t) => {
   client.quit();
 })
 
+test('Deepgram Flux speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.DEEPGRAM_API_KEY) {
+    t.pass('skipping Deepgram Flux speech synth tests since DEEPGRAM_API_KEY');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambones!';
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'deepgramflux',
+      credentials: {
+        api_key: process.env.DEEPGRAM_API_KEY
+      },
+      model: process.env.DEEPGRAM_FLUX_MODEL || 'flux-alexis-en',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthesized deepgramflux audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('xai speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
