@@ -442,6 +442,95 @@ test('Google TTS streaming tests (!JAMBONES_DISABLE_TTS_STREAMING)', async(t) =>
     });
     t.ok(result.filePath.includes('api_mode=tts'), 'options.apiMode=tts overrides HD voice default');
 
+    /* AudioConfig settings (speakingRate, pitch, volumeGainDb) */
+    const googleCreds = {
+      credentials: {
+        client_email: creds.client_email,
+        private_key: creds.private_key,
+      },
+    };
+
+    // Test 9: AudioConfig nested under options.audioConfig, as in google's API docs
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: googleCreds,
+      language: 'en-US',
+      voice: 'en-US-Wavenet-D',
+      text: 'Testing nested audioConfig settings.',
+      options: { audioConfig: { speakingRate: 1.4, pitch: -2.5, volumeGainDb: 6 } },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.includes(',speaking_rate=1.4'), 'nested audioConfig sets speaking_rate');
+    t.ok(result.filePath.includes(',pitch=-2.5'), 'nested audioConfig sets pitch');
+    t.ok(result.filePath.includes(',volume_gain_db=6'), 'nested audioConfig sets volume_gain_db');
+
+    // Test 10: AudioConfig flat at the top level of options, in camelCase or snake_case
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: googleCreds,
+      language: 'en-US',
+      voice: 'en-US-Wavenet-D',
+      text: 'Testing flat audioConfig settings.',
+      options: { speaking_rate: '0.8', volumeGainDb: 3 },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.includes(',speaking_rate=0.8'), 'flat snake_case speaking_rate is honored');
+    t.ok(result.filePath.includes(',volume_gain_db=3'), 'flat camelCase volumeGainDb is honored');
+    t.ok(!result.filePath.includes(',pitch='), 'unspecified audioConfig setting is omitted');
+
+    // Test 11: zero is a meaningful value for pitch and volumeGainDb, not an absent one
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: googleCreds,
+      language: 'en-US',
+      voice: 'en-US-Wavenet-D',
+      text: 'Testing zero audioConfig settings.',
+      options: { audioConfig: { pitch: 0, volumeGainDb: 0 } },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.includes(',pitch=0'), 'pitch=0 is passed through rather than dropped');
+    t.ok(result.filePath.includes(',volume_gain_db=0'), 'volume_gain_db=0 is passed through rather than dropped');
+
+    // Test 12: non-numeric values are ignored, so they cannot corrupt the freeswitch param string
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: googleCreds,
+      language: 'en-US',
+      voice: 'en-US-Wavenet-D',
+      text: 'Testing invalid audioConfig settings.',
+      options: { audioConfig: { speakingRate: 'fast,evil=1', pitch: null, volumeGainDb: '' } },
+      disableTtsCache: true
+    });
+    t.ok(!result.filePath.includes('speaking_rate'), 'non-numeric speakingRate is ignored');
+    t.ok(!result.filePath.includes('evil=1'), 'non-numeric value cannot inject extra params');
+    t.ok(!result.filePath.includes('pitch='), 'null pitch is ignored');
+    t.ok(!result.filePath.includes('volume_gain_db'), 'empty volumeGainDb is ignored');
+
+    // Test 13: no audioConfig supplied leaves the param string untouched
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: googleCreds,
+      language: 'en-US',
+      voice: 'en-US-Wavenet-D',
+      text: 'Testing absent audioConfig settings.',
+      disableTtsCache: true
+    });
+    t.ok(!/speaking_rate|pitch=|volume_gain_db/.test(result.filePath),
+      'no audioConfig params are added when none are supplied');
+
+    // Test 14: HD voice (api_mode=live) also carries speaking_rate, the one setting google streams support
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: googleCreds,
+      language: 'en-US',
+      voice: 'en-US-Chirp3-HD-Charon',
+      text: 'Testing audioConfig on an HD voice.',
+      options: { audioConfig: { speakingRate: 1.25 } },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.includes('api_mode=live'), 'HD voice with audioConfig still uses api_mode=live');
+    t.ok(result.filePath.includes(',speaking_rate=1.25'), 'HD voice streaming path carries speaking_rate');
+
   } catch (err) {
     console.error(err);
     t.end(err);
@@ -525,6 +614,42 @@ test('Google TTS non-streaming tests (JAMBONES_DISABLE_TTS_STREAMING=true)', asy
     });
     t.ok(!result.filePath.startsWith('say:'), 'Gemini TTS does NOT return streaming say: path when disabled');
     t.ok(result.filePath.endsWith('.mp3'), 'Gemini TTS returns mp3 file path');
+
+    const googleCreds = {
+      credentials: {
+        client_email: creds.client_email,
+        private_key: creds.private_key,
+      },
+    };
+
+    /**
+     * Test 4: AudioConfig settings are accepted by the synthesize API.
+     * Google rejects out-of-range values with a 400, so a successful render also confirms
+     * the settings reached the request rather than being silently dropped.
+     */
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: googleCreds,
+      language: 'en-US',
+      voice: 'en-US-Wavenet-D',
+      text: 'This is a test of audioConfig with streaming disabled.',
+      options: { audioConfig: { speakingRate: 1.4, pitch: -2.5, volumeGainDb: 6 } },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.endsWith('.mp3'), 'standard voice renders mp3 with audioConfig settings applied');
+
+    /* Test 5: gemini voices ignore the AudioConfig settings rather than failing on them */
+    result = await synthAudio(stats, {
+      vendor: 'google',
+      credentials: googleCreds,
+      language: 'en-US',
+      voice: 'Kore',
+      model: geminiModel,
+      text: 'This is a test of audioConfig on Gemini TTS.',
+      options: { audioConfig: { speakingRate: 1.4, pitch: -2.5, volumeGainDb: 6 } },
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.endsWith('.mp3'), 'gemini voice renders mp3 with audioConfig settings skipped');
 
   } catch (err) {
     console.error(err);
