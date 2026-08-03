@@ -1058,6 +1058,36 @@ test('Cartesia speech synth tests', async(t) => {
   client.quit();
 });
 
+test('nineninesix speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.NINENINESIX_API_KEY) {
+    t.pass('skipping nineninesix speech synth tests since NINENINESIX_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambones! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'nineninesix',
+      credentials: {
+        api_key: process.env.NINENINESIX_API_KEY,
+        model_id: 'gepard-1.0'
+      },
+      language: 'en',
+      voice: '3ad7a827-7fd1-4954-bf35-47d4cc33d9ed',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed nineninesix audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('inworld speech synth', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
