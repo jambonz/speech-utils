@@ -1058,6 +1058,35 @@ test('Cartesia speech synth tests', async(t) => {
   client.quit();
 });
 
+test('gradium speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.GRADIUM_API_KEY) {
+    t.pass('skipping gradium speech synth tests since GRADIUM_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambones! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'gradium',
+      credentials: {
+        api_key: process.env.GRADIUM_API_KEY,
+        model_id: 'default'
+      },
+      voice: 'YTpq7expH9539ERJ',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed gradium audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('nineninesix speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
