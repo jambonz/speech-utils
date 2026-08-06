@@ -36,8 +36,7 @@
     "debug": "^4.3.4",
     "google-protobuf": "^3.21.2",
     "microsoft-cognitiveservices-speech-sdk": "^1.51.0",
-    "openai": "^4.98.0",
-    "undici": "^7.5.0"
+    "openai": "^4.98.0"
   },
   "devDependencies": {
     "config": "^4.2.0",
