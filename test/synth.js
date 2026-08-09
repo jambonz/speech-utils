@@ -1148,16 +1148,31 @@ test('inworld speech synth', async(t) => {
 });
 
 test('inworld streaming say: params', async(t) => {
+  /* This test asserts the streaming say: path, so it must run with streaming
+     enabled. The Google non-streaming test above sets
+     JAMBONES_DISABLE_TTS_STREAMING and, on its no-credentials skip path,
+     deletes the env var WITHOUT clearing the require cache — so lib/config can
+     still be holding 'true' by the time we get here. Re-require to be
+     independent of what ran before us.
+   */
+  delete process.env.JAMBONES_DISABLE_TTS_STREAMING;
+  delete require.cache[require.resolve('../lib/config')];
+  delete require.cache[require.resolve('../lib/synth-audio')];
+  delete require.cache[require.resolve('..')];
+
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
 
-  /* the streaming branch builds the say: path without calling the vendor,
-     so this needs no credentials
-   */
+  if (!process.env.INWORLD_API_KEY) {
+    t.pass('skipping inworld streaming say: param tests since INWORLD_API_KEY is not provided');
+    client.quit();
+    return t.end();
+  }
+
   try {
     let result = await synthAudio(stats, {
       vendor: 'inworld',
-      credentials: {api_key: 'test-key', model_id: 'inworld-tts-1.5-mini'},
+      credentials: {api_key: process.env.INWORLD_API_KEY, model_id: 'inworld-tts-1.5-mini'},
       language: 'en',
       voice: 'Ashley',
       text: 'This is a test of inworld streaming.',
@@ -1179,7 +1194,7 @@ test('inworld streaming say: params', async(t) => {
     /* options omitted entirely: no stray keys */
     result = await synthAudio(stats, {
       vendor: 'inworld',
-      credentials: {api_key: 'test-key', model_id: 'inworld-tts-1.5-mini'},
+      credentials: {api_key: process.env.INWORLD_API_KEY, model_id: 'inworld-tts-1.5-mini'},
       language: 'en',
       voice: 'Ashley',
       text: 'This is a test of inworld streaming.',
