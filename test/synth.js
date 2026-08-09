@@ -1147,6 +1147,54 @@ test('inworld speech synth', async(t) => {
   client.quit();
 });
 
+test('inworld streaming say: params', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  /* the streaming branch builds the say: path without calling the vendor,
+     so this needs no credentials
+   */
+  try {
+    let result = await synthAudio(stats, {
+      vendor: 'inworld',
+      credentials: {api_key: 'test-key', model_id: 'inworld-tts-1.5-mini'},
+      language: 'en',
+      voice: 'Ashley',
+      text: 'This is a test of inworld streaming.',
+      options: {temperature: 0.9, audioConfig: {pitch: 2.5, speakingRate: 1.2}},
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.startsWith('say:'), 'inworld returns streaming say: path');
+    t.ok(result.filePath.includes('vendor=inworld'), 'streaming path contains vendor=inworld');
+    t.ok(result.filePath.includes('voice=Ashley'), 'streaming path contains voice');
+    t.ok(result.filePath.includes('model_id=inworld-tts-1.5-mini'), 'streaming path contains model_id');
+    t.ok(result.filePath.includes('temperature=0.9'), 'streaming path contains temperature');
+    /* pitch and speakingRate are nested under audioConfig; they used to be read
+       from the top level and emitted as "undefined"
+     */
+    t.ok(result.filePath.includes('speakingRate=1.2'), 'audioConfig.speakingRate reaches the say: params');
+    t.ok(result.filePath.includes('pitch=2.5'), 'audioConfig.pitch reaches the say: params');
+    t.ok(!result.filePath.includes('undefined'), 'no undefined values in the say: params');
+
+    /* options omitted entirely: no stray keys */
+    result = await synthAudio(stats, {
+      vendor: 'inworld',
+      credentials: {api_key: 'test-key', model_id: 'inworld-tts-1.5-mini'},
+      language: 'en',
+      voice: 'Ashley',
+      text: 'This is a test of inworld streaming.',
+      disableTtsCache: true
+    });
+    t.ok(!result.filePath.includes('speakingRate='), 'speakingRate omitted when unset');
+    t.ok(!result.filePath.includes('pitch='), 'pitch omitted when unset');
+    t.ok(!result.filePath.includes('undefined'), 'no undefined values when options are omitted');
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('resemble speech synth', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
