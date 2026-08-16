@@ -1104,7 +1104,7 @@ test('nineninesix speech synth tests', async(t) => {
         model_id: 'gepard-1.0'
       },
       language: 'en',
-      voice: '3ad7a827-7fd1-4954-bf35-47d4cc33d9ed',
+      voice: '775e4dfd-819c-4325-92ec-250f487ef7e3',
       text,
       renderForCaching: true
     });
