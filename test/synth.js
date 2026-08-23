@@ -1087,6 +1087,47 @@ test('gradium speech synth tests', async(t) => {
   client.quit();
 });
 
+test('fishaudio speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.FISHAUDIO_API_KEY) {
+    t.pass('skipping fishaudio speech synth tests since FISHAUDIO_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambones! ' + Date.now();
+  try {
+    /* voice 'default' means "send no reference_id" — fish's own default voice */
+    const o = await synthAudio(stats, {
+      vendor: 'fishaudio',
+      credentials: {
+        api_key: process.env.FISHAUDIO_API_KEY,
+        model_id: 's2.1-pro'
+      },
+      voice: 'default',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!o.servedFromCache, `successfully synthed fishaudio audio to ${o.filePath}`);
+
+    /* the cache render must be raw 8k pcm (r8): fish's wav header carries a
+       placeholder RIFF size, so we never ask for wav */
+    const o2 = await synthAudio(stats, {
+      vendor: 'fishaudio',
+      credentials: {api_key: process.env.FISHAUDIO_API_KEY},
+      voice: 'default',
+      text: text + ' two',
+      renderForCaching: true,
+      disableTtsCache: true
+    });
+    t.ok(!o2.servedFromCache, 'fishaudio synthed a second uncached render');
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('nineninesix speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
