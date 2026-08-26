@@ -722,8 +722,14 @@ test('AWS speech synth tests by RoleArn', async(t) => {
       // the same vendor/voice/language, and identical text would hit that cache entry,
       // making servedFromCache true and this assertion fail.
       text: 'This is a roleArn test.  This is only a roleArn test',
+      // Without this, synthPolly returns the mediajam streaming params string, which
+      // embeds accessKeyId/secretAccessKey/sessionToken (see lib/synth-audio.js).
+      // Every other synth test in this file renders for caching; this one did not,
+      // so it printed live credentials into a public CI log.
+      renderForCaching: true,
     });
-    t.ok(!opts.servedFromCache, `successfully synthesized aws by roleArn audio to ${opts.filePath}`);
+    // Deliberately does not interpolate opts.filePath -- it can carry credentials.
+    t.ok(!opts.servedFromCache, 'successfully synthesized aws by roleArn audio');
   } catch (err) {
     console.error(err);
     t.end(err);
