@@ -21,13 +21,18 @@ test('AWS - create and cache auth token', async(t) => {
       client.quit();
       return;
   }
+  // getAwsAuthToken derives its cache key from roleArn || accessKeyId || speech_credential_sid.
+  // With temporary credentials none of the first two are passed, so supply a stable sid --
+  // which is what production does for instance-profile credentials.
+  const args = {...credentials, speech_credential_sid: 'test-aws-speech-credential'};
+
   try {
-    let obj = await getAwsAuthToken(credentials);
+    let obj = await getAwsAuthToken(args);
     //console.log({obj}, 'received auth token from AWS');
     t.ok(obj.securityToken && !obj.servedFromCache, 'successfullY generated auth token from AWS');
 
     await sleep(250);
-    obj = await getAwsAuthToken(credentials);
+    obj = await getAwsAuthToken(args);
     //console.log({obj}, 'received auth token from AWS - second request');
     t.ok(obj.securityToken && obj.servedFromCache, 'successfully received access token from cache');
  
