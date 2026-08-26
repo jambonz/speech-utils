@@ -7,11 +7,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # required to request the GitHub OIDC token for AWS
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::376029039784:role/jambonz-ci-speech-tests
+          aws-region: us-east-1
       - run: npm install
       - run: npm run jslint
       - run: sudo apt update && sudo apt install -y squid
@@ -19,9 +26,8 @@ jobs:
       - run: sudo systemctl start squid
       - run: npm test
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # AWS_* are exported by configure-aws-credentials above as short-lived
+          # OIDC credentials; no AWS keys are stored as repository secrets.
           GCP_JSON_KEY: ${{ secrets.GCP_JSON_KEY }}
 
           MICROSOFT_API_KEY: ${{ secrets.MICROSOFT_API_KEY }}

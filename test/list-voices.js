@@ -1,4 +1,5 @@
 const test = require('tape').test ;
+const awsCredentials = require('./aws-credentials');
 const config = require('config');
 const opts = config.get('redis');
 const fs = require('fs');
@@ -45,18 +46,15 @@ test('AWS tests', async(t) => {
   const fn = require('..');
   const {client, getTtsVoices} = fn(opts, logger);
 
-  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
-    t.pass('skipping AWS speech synth tests since AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, or AWS_REGION not provided');
+  const credentials = awsCredentials();
+  if (!credentials) {
+    t.pass('skipping AWS speech synth tests since AWS_REGION not provided');
     return t.end();
   }
   try {
     const opts = {
       vendor: 'aws',
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        region: process.env.AWS_REGION,
-      }
+      credentials
     };
     let result = await getTtsVoices(opts);
     t.ok(result?.Voices?.length > 0, `GetVoices: successfully retrieved ${result.Voices.length} voices from AWS`);
