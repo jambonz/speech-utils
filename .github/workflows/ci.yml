@@ -17,7 +17,7 @@ jobs:
           node-version: '20'
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::376029039784:role/jambonz-ci-speech-tests
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
       - run: npm install
       - run: npm run jslint
@@ -29,6 +29,9 @@ jobs:
           # AWS_* are exported by configure-aws-credentials above as short-lived
           # OIDC credentials; no AWS keys are stored as repository secrets.
           GCP_JSON_KEY: ${{ secrets.GCP_JSON_KEY }}
+          # Enables the "AWS speech synth tests by RoleArn" test, which exercises the
+          # AssumeRole credential path used in production.
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
           MICROSOFT_API_KEY: ${{ secrets.MICROSOFT_API_KEY }}
           MICROSOFT_REGION: ${{ secrets.MICROSOFT_REGION }}
