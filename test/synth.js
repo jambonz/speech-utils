@@ -1,4 +1,5 @@
 const test = require('tape').test;
+const awsCredentials = require('./aws-credentials');
 const config = require('config');
 const opts = config.get('redis');
 const fs = require('fs');
@@ -668,18 +669,15 @@ test('AWS speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
 
-  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
-    t.pass('skipping AWS speech synth tests since AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, or AWS_REGION not provided');
+  const credentials = awsCredentials();
+  if (!credentials) {
+    t.pass('skipping AWS speech synth tests since AWS_REGION not provided');
     return t.end();
   }
   try {
     let opts = await synthAudio(stats, {
       vendor: 'aws',
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        region: process.env.AWS_REGION,
-      },
+      credentials,
       language: 'en-US',
       voice: 'Joey',
       text: 'This is a test.  This is only a test',
@@ -689,11 +687,7 @@ test('AWS speech synth tests', async(t) => {
 
     opts = await synthAudio(stats, {
       vendor: 'aws',
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        region: process.env.AWS_REGION,
-      },
+      credentials,
       language: 'en-US',
       voice: 'Joey',
       text: 'This is a test.  This is only a test',
@@ -724,7 +718,10 @@ test('AWS speech synth tests by RoleArn', async(t) => {
       },
       language: 'en-US',
       voice: 'Joey',
-      text: 'This is a test.  This is only a test',
+      // Distinct text on purpose: the 'AWS speech synth tests' above cache audio for
+      // the same vendor/voice/language, and identical text would hit that cache entry,
+      // making servedFromCache true and this assertion fail.
+      text: 'This is a roleArn test.  This is only a roleArn test',
     });
     t.ok(!opts.servedFromCache, `successfully synthesized aws by roleArn audio to ${opts.filePath}`);
   } catch (err) {

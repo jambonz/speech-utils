@@ -6,33 +6,33 @@ process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
 });
 
+const awsCredentials = require('./aws-credentials');
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 test('AWS - create and cache auth token', async(t) => {
   const fn = require('..');
   const {client, getAwsAuthToken} = fn(opts, logger);
 
-  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
+  const credentials = awsCredentials();
+  if (!credentials) {
       t.pass('skipping AWS auth token tests since no AWS credentials provided');
       t.end();
       client.quit();
       return;
   }
+  // getAwsAuthToken derives its cache key from roleArn || accessKeyId || speech_credential_sid.
+  // With temporary credentials none of the first two are passed, so supply a stable sid --
+  // which is what production does for instance-profile credentials.
+  const args = {...credentials, speech_credential_sid: 'test-aws-speech-credential'};
+
   try {
-    let obj = await getAwsAuthToken({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      region: process.env.AWS_REGION
-    });
+    let obj = await getAwsAuthToken(args);
     //console.log({obj}, 'received auth token from AWS');
     t.ok(obj.securityToken && !obj.servedFromCache, 'successfullY generated auth token from AWS');
 
     await sleep(250);
-    obj = await getAwsAuthToken({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      region: process.env.AWS_REGION
-    });
+    obj = await getAwsAuthToken(args);
     //console.log({obj}, 'received auth token from AWS - second request');
     t.ok(obj.securityToken && obj.servedFromCache, 'successfully received access token from cache');
  
