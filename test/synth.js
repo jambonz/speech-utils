@@ -718,7 +718,10 @@ test('AWS speech synth tests by RoleArn', async(t) => {
       },
       language: 'en-US',
       voice: 'Joey',
-      text: 'This is a test.  This is only a test',
+      // Distinct text on purpose: the 'AWS speech synth tests' above cache audio for
+      // the same vendor/voice/language, and identical text would hit that cache entry,
+      // making servedFromCache true and this assertion fail.
+      text: 'This is a roleArn test.  This is only a roleArn test',
     });
     t.ok(!opts.servedFromCache, `successfully synthesized aws by roleArn audio to ${opts.filePath}`);
   } catch (err) {
