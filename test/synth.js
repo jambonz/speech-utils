@@ -1161,6 +1161,51 @@ test('nineninesix speech synth tests', async(t) => {
   client.quit();
 });
 
+test('gandr speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.GANDR_API_KEY) {
+    t.pass('skipping gandr speech synth tests since GANDR_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambones! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'gandr',
+      credentials: {
+        api_key: process.env.GANDR_API_KEY
+      },
+      language: 'en-US',
+      voice: 'gandr-mia',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed gandr audio to ${opts.filePath}`);
+
+    try {
+      await synthAudio(stats, {
+        vendor: 'gandr',
+        credentials: {
+          api_key: process.env.GANDR_API_KEY
+        },
+        language: 'en-US',
+        voice: 'gandr-mia',
+        text: 'a'.repeat(2001),
+        renderForCaching: true
+      });
+      t.fail('gandr should reject input longer than 2000 characters');
+    } catch (err) {
+      t.ok(err.message.includes('2000'), 'gandr rejects input longer than 2000 characters before any request');
+    }
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('inworld speech synth', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
