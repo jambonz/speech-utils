@@ -69,3 +69,26 @@ test('AWS tests', async(t) => {
   }
   client.quit();
 });
+
+test('gandr tests', async(t) => {
+  const fn = require('..');
+  const {client, getTtsVoices} = fn(opts, logger);
+
+  try {
+    const opts = {
+      vendor: 'gandr',
+      credentials: {}
+    };
+    let result = await getTtsVoices(opts);
+    t.ok(result?.voices?.length === 6, `GetVoices: successfully retrieved ${result.voices.length} voices from gandr`);
+
+    await client.flushall();
+
+    t.end();
+  }
+  catch (err) {
+    console.error(err);
+    t.end(err);
+  }
+  client.quit();
+});
