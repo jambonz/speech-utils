@@ -1090,6 +1090,36 @@ test('gradium speech synth tests', async(t) => {
   client.quit();
 });
 
+test('kugelaudio speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.KUGELAUDIO_API_KEY) {
+    t.pass('skipping kugelaudio speech synth tests since KUGELAUDIO_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Guten Tag und willkommen bei jambonz! Ihre Bestellung kostet 12,99 Euro. ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'kugelaudio',
+      credentials: {
+        api_key: process.env.KUGELAUDIO_API_KEY,
+        model_id: 'kugel-3'
+      },
+      language: 'de-DE',
+      voice: '1930',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed kugelaudio audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('fishaudio speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
