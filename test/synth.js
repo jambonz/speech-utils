@@ -1120,6 +1120,35 @@ test('kugelaudio speech synth tests', async(t) => {
   client.quit();
 });
 
+test('speechify speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.SPEECHIFY_API_KEY) {
+    t.pass('skipping speechify speech synth tests since SPEECHIFY_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'speechify',
+      credentials: {
+        api_key: process.env.SPEECHIFY_API_KEY
+      },
+      language: 'en-US',
+      voice: 'geffen_32',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed speechify audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('fishaudio speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
