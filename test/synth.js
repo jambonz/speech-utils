@@ -1149,6 +1149,35 @@ test('speechify speech synth tests', async(t) => {
   client.quit();
 });
 
+test('giggy speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.GIGGY_API_KEY) {
+    t.pass('skipping giggy speech synth tests since GIGGY_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'giggy',
+      credentials: {
+        api_key: process.env.GIGGY_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.GIGGY_VOICE_ID || '8f5aee7d-dd96-41c4-b04f-19bff046b02a',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed giggy audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('fishaudio speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
