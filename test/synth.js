@@ -1149,6 +1149,35 @@ test('speechify speech synth tests', async(t) => {
   client.quit();
 });
 
+test('svara speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.SVARA_API_KEY) {
+    t.pass('skipping svara speech synth tests since SVARA_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'svara',
+      credentials: {
+        api_key: process.env.SVARA_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.SVARA_VOICE_ID || 'sv_a5thzx8v',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed svara audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('fishaudio speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
