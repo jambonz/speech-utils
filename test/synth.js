@@ -1041,10 +1041,9 @@ test('Cartesia speech synth tests', async(t) => {
       vendor: 'cartesia',
       credentials: {
         api_key: process.env.CARTESIA_API_KEY,
-        model_id: 'sonic-english',
+        model_id: 'sonic-3.6',
         options: JSON.stringify({
           speed: 1,
-          emotion: 'female_happy',
         })
       },
       language: 'en',
