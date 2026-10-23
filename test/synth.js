@@ -1206,6 +1206,35 @@ test('svara speech synth tests', async(t) => {
   client.quit();
 });
 
+test('mistral speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.MISTRAL_API_KEY) {
+    t.pass('skipping mistral speech synth tests since MISTRAL_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'mistral',
+      credentials: {
+        api_key: process.env.MISTRAL_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.MISTRAL_VOICE_ID || 'voice_478',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed mistral audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('fishaudio speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
