@@ -1206,6 +1206,35 @@ test('svara speech synth tests', async(t) => {
   client.quit();
 });
 
+test('paxa speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.PAXA_API_KEY) {
+    t.pass('skipping paxa speech synth tests since PAXA_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'paxa',
+      credentials: {
+        api_key: process.env.PAXA_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.PAXA_VOICE_ID || 'khanomkrok',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed paxa audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('mistral speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
