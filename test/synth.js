@@ -1250,7 +1250,7 @@ test('assemblyai speech synth tests', async(t) => {
       credentials: {
         api_key: process.env.ASSEMBLYAI_API_KEY
       },
-      language: 'en-US',
+      language: 'english',
       voice: 'aai-jane',
       text,
       renderForCaching: true
