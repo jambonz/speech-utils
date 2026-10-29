@@ -1235,6 +1235,35 @@ test('paxa speech synth tests', async(t) => {
   client.quit();
 });
 
+test('assemblyai speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.ASSEMBLYAI_API_KEY) {
+    t.pass('skipping assemblyai speech synth tests since ASSEMBLYAI_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'assemblyai',
+      credentials: {
+        api_key: process.env.ASSEMBLYAI_API_KEY
+      },
+      language: 'english',
+      voice: 'aai-jane',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed assemblyai audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('mistral speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
