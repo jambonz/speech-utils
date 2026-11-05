@@ -1235,6 +1235,762 @@ test('paxa speech synth tests', async(t) => {
   client.quit();
 });
 
+test('soniox speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.SONIOX_API_KEY) {
+    t.pass('skipping soniox speech synth tests since SONIOX_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'soniox',
+      credentials: {
+        api_key: process.env.SONIOX_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.SONIOX_VOICE_ID || 'Adrian',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed soniox audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('gnani speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.GNANI_API_KEY) {
+    t.pass('skipping gnani speech synth tests since GNANI_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'gnani',
+      credentials: {
+        api_key: process.env.GNANI_API_KEY
+      },
+      language: 'en-IN',
+      voice: process.env.GNANI_VOICE_ID || 'Kaveri',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed gnani audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('minimax speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.MINIMAX_API_KEY) {
+    t.pass('skipping minimax speech synth tests since MINIMAX_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'minimax',
+      credentials: {
+        api_key: process.env.MINIMAX_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.MINIMAX_VOICE_ID || 'English_expressive_narrator',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed minimax audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('minimax streaming say: params', async(t) => {
+  delete process.env.JAMBONES_DISABLE_TTS_STREAMING;
+  delete require.cache[require.resolve('../lib/config')];
+  delete require.cache[require.resolve('../lib/synth-audio')];
+  delete require.cache[require.resolve('..')];
+
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  try {
+    let result = await synthAudio(stats, {
+      vendor: 'minimax',
+      credentials: {api_key: process.env.MINIMAX_API_KEY || 'dummy'},
+      language: 'en-US',
+      voice: 'English_expressive_narrator',
+      text: 'This is a test of minimax streaming.',
+      options: {language_boost: 'Chinese,Yue', english_normalization: true, continuous_sound: true},
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.startsWith('say:'), 'minimax returns streaming say: path');
+    t.ok(result.filePath.includes(',language_boost=Chinese;Yue'), 'language_boost commas are encoded');
+    t.ok(!result.filePath.includes('Chinese,Yue'), 'raw comma never reaches the say: params');
+    t.ok(result.filePath.includes(',english_normalization=true'), 'english_normalization stays on the ws path');
+    t.ok(result.filePath.includes(',continuous_sound=true'), 'continuous_sound stays on the ws path');
+
+    result = await synthAudio(stats, {
+      vendor: 'minimax',
+      credentials: {api_key: process.env.MINIMAX_API_KEY || 'dummy'},
+      language: 'en-US',
+      voice: 'English_expressive_narrator',
+      text: 'This is a test of minimax streaming.',
+      disableTtsCache: true
+    });
+    t.ok(!result.filePath.includes('language_boost='), 'language_boost omitted when unset');
+    t.ok(!result.filePath.includes('undefined'), 'no undefined values in the say: params');
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('neuphonic speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.NEUPHONIC_API_KEY) {
+    t.pass('skipping neuphonic speech synth tests since NEUPHONIC_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'neuphonic',
+      credentials: {
+        api_key: process.env.NEUPHONIC_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.NEUPHONIC_VOICE_ID || 'eeb488b8-d532-4235-aa57-f070cfc44750',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed neuphonic audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('camb streaming say: params', async(t) => {
+  delete process.env.JAMBONES_DISABLE_TTS_STREAMING;
+  delete require.cache[require.resolve('../lib/config')];
+  delete require.cache[require.resolve('../lib/synth-audio')];
+  delete require.cache[require.resolve('..')];
+
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  try {
+    let result = await synthAudio(stats, {
+      vendor: 'camb',
+      credentials: {api_key: process.env.CAMB_API_KEY || 'dummy'},
+      language: 'en-US',
+      voice: '147320',
+      text: 'This is a test of camb streaming.',
+      options: {user_instructions: 'Warm, clear, and\nconversational.', speaking_rate: 1.1},
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.startsWith('say:'), 'camb returns streaming say: path');
+    t.ok(result.filePath.includes(',user_instructions=Warm; clear; and conversational.'),
+      'user_instructions commas and newlines are encoded');
+    t.ok(!result.filePath.includes('Warm, clear'), 'raw comma never reaches the say: params');
+    t.ok(result.filePath.includes(',speaking_rate=1.1'), 'other options pass through unchanged');
+
+    result = await synthAudio(stats, {
+      vendor: 'camb',
+      credentials: {api_key: process.env.CAMB_API_KEY || 'dummy'},
+      language: 'en-US',
+      voice: '147320',
+      text: 'This is a test of camb streaming.',
+      disableTtsCache: true
+    });
+    t.ok(!result.filePath.includes('user_instructions='), 'user_instructions omitted when unset');
+    t.ok(!result.filePath.includes('undefined'), 'no undefined values in the say: params');
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('camb speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.CAMB_API_KEY) {
+    t.pass('skipping camb speech synth tests since CAMB_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'camb',
+      credentials: {
+        api_key: process.env.CAMB_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.CAMB_VOICE_ID || '147320',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed camb audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('asyncai speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.ASYNCAI_API_KEY) {
+    t.pass('skipping asyncai speech synth tests since ASYNCAI_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'asyncai',
+      credentials: {
+        api_key: process.env.ASYNCAI_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.ASYNCAI_VOICE_ID || 'e0f39dc4-f691-4e78-bba5-5c636692cc04',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed asyncai audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('respeecher speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.RESPEECHER_API_KEY) {
+    t.pass('skipping respeecher speech synth tests since RESPEECHER_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'respeecher',
+      credentials: {
+        api_key: process.env.RESPEECHER_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.RESPEECHER_VOICE_ID || 'samantha',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed respeecher audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('bland speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.BLAND_API_KEY) {
+    t.pass('skipping bland speech synth tests since BLAND_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'bland',
+      credentials: {
+        api_key: process.env.BLAND_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.BLAND_VOICE_ID || '29158307-9893-4149-8a75-bc9ce313d64e',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed bland audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('simplismart speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.SIMPLISMART_API_KEY) {
+    t.pass('skipping simplismart speech synth tests since SIMPLISMART_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'simplismart',
+      credentials: {
+        api_key: process.env.SIMPLISMART_API_KEY,
+        ...(process.env.SIMPLISMART_API_URI && {api_uri: process.env.SIMPLISMART_API_URI}),
+        ...(process.env.SIMPLISMART_MODEL_ID && {model_id: process.env.SIMPLISMART_MODEL_ID})
+      },
+      language: 'en-US',
+      voice: process.env.SIMPLISMART_VOICE_ID || 'tara',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed simplismart audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('spitch speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.SPITCH_API_KEY) {
+    t.pass('skipping spitch speech synth tests since SPITCH_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'spitch',
+      credentials: {
+        api_key: process.env.SPITCH_API_KEY,
+        ...(process.env.SPITCH_API_URI && {api_uri: process.env.SPITCH_API_URI})
+      },
+      language: 'en-US',
+      voice: process.env.SPITCH_VOICE_ID || 'lina',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed spitch audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('kokoro speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.KOKORO_API_URI) {
+    t.pass('skipping kokoro speech synth tests since KOKORO_API_URI is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'kokoro',
+      credentials: {
+        api_uri: process.env.KOKORO_API_URI,
+        ...(process.env.KOKORO_API_KEY && {api_key: process.env.KOKORO_API_KEY})
+      },
+      language: 'en-US',
+      voice: process.env.KOKORO_VOICE_ID || 'af_heart',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed kokoro audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('vakyam speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.VAKYAM_API_KEY) {
+    t.pass('skipping vakyam speech synth tests since VAKYAM_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'vakyam',
+      credentials: {
+        api_key: process.env.VAKYAM_API_KEY
+      },
+      language: 'en-IN',
+      voice: process.env.VAKYAM_VOICE_ID || 'Archana',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed vakyam audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('groq speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.GROQ_API_KEY) {
+    t.pass('skipping groq speech synth tests since GROQ_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'groq',
+      credentials: {
+        api_key: process.env.GROQ_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.GROQ_VOICE_ID || 'autumn',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed groq audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('groq http api_uri uses plain http on the REST path', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+  const http = require('http');
+  let seen;
+  const server = http.createServer((req, res) => {
+    let body = '';
+    req.on('data', (c) => body += c);
+    req.on('end', () => {
+      seen = {url: req.url, auth: req.headers.authorization, body: JSON.parse(body)};
+      res.writeHead(200, {'Content-Type': 'audio/wav'});
+      res.end(Buffer.from('RIFF0000WAVE'));
+    });
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  try {
+    await synthAudio(stats, {
+      vendor: 'groq',
+      credentials: {api_key: 'test-key', api_uri: `http://127.0.0.1:${server.address().port}`},
+      language: 'en-US',
+      voice: 'autumn',
+      text: 'groq http scheme ' + Date.now(),
+      renderForCaching: true,
+      disableTtsCache: true
+    });
+    t.equal(seen?.url, '/openai/v1/audio/speech', 'request reached the http proxy');
+    t.equal(seen?.auth, 'Bearer test-key', 'api key sent as bearer');
+    t.equal(seen?.body?.voice, 'autumn', 'voice in body');
+    t.end();
+  } catch (err) {
+    t.end(err);
+  } finally {
+    server.close();
+    client.quit();
+  }
+});
+
+for (const {vendor, voice, scheme = 'http'} of [{vendor: 'spitch', voice: 'lucy'},
+  {vendor: 'speechmatics', voice: 'sarah'}, {vendor: 'spitch', voice: 'lucy', scheme: 'HTTP'}]) {
+  test(`${vendor} ${scheme}:// api_uri uses plain http on the REST path`, async(t) => {
+    const fn = require('..');
+    const {synthAudio, client} = fn(opts, logger);
+    const http = require('http');
+    let seen;
+    const server = http.createServer((req, res) => {
+      seen = {method: req.method, url: req.url};
+      req.resume();
+      req.on('end', () => {
+        res.writeHead(200, {'Content-Type': 'audio/pcm'});
+        res.end(Buffer.alloc(320));
+      });
+    });
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      await synthAudio(stats, {
+        vendor,
+        credentials: {api_key: 'test-key', api_uri: `${scheme}://127.0.0.1:${server.address().port}`},
+        language: 'en-US',
+        voice,
+        text: `${vendor} ${scheme} scheme ` + Date.now(),
+        renderForCaching: true,
+        disableTtsCache: true
+      }).catch(() => {});
+      t.equal(seen?.method, 'POST', 'request reached the http proxy');
+      t.end();
+    } finally {
+      server.close();
+      client.quit();
+    }
+  });
+}
+
+test('hume speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.HUME_API_KEY) {
+    t.pass('skipping hume speech synth tests since HUME_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'hume',
+      credentials: {
+        api_key: process.env.HUME_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.HUME_VOICE_ID || 'Ava Song',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed hume audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('speechmatics speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.SPEECHMATICS_API_KEY) {
+    t.pass('skipping speechmatics speech synth tests since SPEECHMATICS_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'speechmatics',
+      credentials: {
+        api_key: process.env.SPEECHMATICS_API_KEY
+      },
+      language: 'en-GB',
+      voice: 'sarah',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed speechmatics audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('sarvam speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.SARVAM_API_KEY) {
+    t.pass('skipping sarvam speech synth tests since SARVAM_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'sarvam',
+      credentials: {
+        api_key: process.env.SARVAM_API_KEY
+      },
+      language: 'en-IN',
+      voice: process.env.SARVAM_VOICE_ID || 'simran_en_customer',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed sarvam audio to ${opts.filePath}`);
+
+    const opts2 = await synthAudio(stats, {
+      vendor: 'sarvam',
+      credentials: {
+        api_key: process.env.SARVAM_API_KEY
+      },
+      language: 'en-IN',
+      voice: process.env.SARVAM_VOICE_ID || 'simran_en_customer',
+      options: {enable_cached_responses: 'false', pace: 1.1},
+      text: text + ' options',
+      renderForCaching: true
+    });
+    t.ok(!opts2.servedFromCache, `successfully synthed sarvam audio with options to ${opts2.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('smallestai speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.SMALLESTAI_API_KEY) {
+    t.pass('skipping smallestai speech synth tests since SMALLESTAI_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'smallestai',
+      credentials: {
+        api_key: process.env.SMALLESTAI_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.SMALLESTAI_VOICE_ID || 'kaitlyn',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed smallestai audio to ${opts.filePath}`);
+
+    /* REST path accepts session_id/request_id in the body and x-expire-content header */
+    const withIds = await synthAudio(stats, {
+      vendor: 'smallestai',
+      credentials: {
+        api_key: process.env.SMALLESTAI_API_KEY
+      },
+      language: 'en-US',
+      voice: process.env.SMALLESTAI_VOICE_ID || 'kaitlyn',
+      text: `${text} with ids`,
+      options: {session_id: 'jambonz-test', request_id: `req-${Date.now()}`, expire_content: 3600},
+      renderForCaching: true,
+      disableTtsCache: true
+    });
+    t.ok(!withIds.servedFromCache, 'smallestai REST synth succeeds with session_id/request_id/expire_content');
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('smallestai streaming say: params', async(t) => {
+  delete process.env.JAMBONES_DISABLE_TTS_STREAMING;
+  delete require.cache[require.resolve('../lib/config')];
+  delete require.cache[require.resolve('../lib/synth-audio')];
+  delete require.cache[require.resolve('..')];
+
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  try {
+    /* streaming path builds the say: string without calling smallest.ai */
+    let result = await synthAudio(stats, {
+      vendor: 'smallestai',
+      credentials: {api_key: process.env.SMALLESTAI_API_KEY || 'dummy'},
+      language: 'en-US',
+      voice: 'kaitlyn',
+      text: 'This is a test of smallestai streaming.',
+      options: {session_id: 'sess-1', request_id: 'req-1', expire_content: 3600},
+      disableTtsCache: true
+    });
+    t.ok(result.filePath.startsWith('say:'), 'smallestai returns streaming say: path');
+    t.ok(result.filePath.includes(',session_id=sess-1'), 'session_id reaches the say: params');
+    t.ok(result.filePath.includes(',request_id=req-1'), 'request_id reaches the say: params');
+    t.ok(result.filePath.includes(',expire_content=3600'), 'expire_content reaches the say: params');
+
+    result = await synthAudio(stats, {
+      vendor: 'smallestai',
+      credentials: {api_key: process.env.SMALLESTAI_API_KEY || 'dummy'},
+      language: 'en-US',
+      voice: 'kaitlyn',
+      text: 'This is a test of smallestai streaming.',
+      disableTtsCache: true
+    });
+    t.ok(!result.filePath.includes('session_id='), 'session_id omitted when unset');
+    t.ok(!result.filePath.includes('request_id='), 'request_id omitted when unset');
+    t.ok(!result.filePath.includes('expire_content='), 'expire_content omitted when unset');
+    t.ok(!result.filePath.includes('undefined'), 'no undefined values in the say: params');
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('azureopenai speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.AZUREOPENAI_API_KEY || !process.env.AZUREOPENAI_API_URI) {
+    t.pass('skipping azureopenai speech synth tests since AZUREOPENAI_API_KEY/AZUREOPENAI_API_URI is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'azureopenai',
+      credentials: {
+        api_key: process.env.AZUREOPENAI_API_KEY,
+        api_uri: process.env.AZUREOPENAI_API_URI,
+        ...(process.env.AZUREOPENAI_TTS_DEPLOYMENT && {model_id: process.env.AZUREOPENAI_TTS_DEPLOYMENT})
+      },
+      language: 'en-US',
+      voice: 'alloy',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed azureopenai audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
 test('assemblyai speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
