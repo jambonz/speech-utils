@@ -1612,6 +1612,86 @@ test('spitch speech synth tests', async(t) => {
   client.quit();
 });
 
+test('phonic speech synth tests', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+
+  if (!process.env.PHONIC_API_KEY) {
+    t.pass('skipping phonic speech synth tests since PHONIC_API_KEY is not provided');
+    return t.end();
+  }
+  const text = 'Hi there and welcome to jambonz! ' + Date.now();
+  try {
+    const opts = await synthAudio(stats, {
+      vendor: 'phonic',
+      credentials: {
+        api_key: process.env.PHONIC_API_KEY,
+        ...(process.env.PHONIC_API_URI && {api_uri: process.env.PHONIC_API_URI})
+      },
+      language: 'en-US',
+      voice: process.env.PHONIC_VOICE_ID || 'sabrina',
+      text,
+      renderForCaching: true
+    });
+    t.ok(!opts.servedFromCache, `successfully synthed phonic audio to ${opts.filePath}`);
+
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    t.end(err);
+  }
+  client.quit();
+});
+
+test('phonic REST request and say url', async(t) => {
+  const fn = require('..');
+  const {synthAudio, client} = fn(opts, logger);
+  const http = require('http');
+  let seen;
+  const server = http.createServer((req, res) => {
+    let raw = '';
+    req.on('data', (d) => raw += d);
+    req.on('end', () => {
+      seen = {url: req.url, auth: req.headers.authorization, body: JSON.parse(raw)};
+      res.writeHead(200, {'Content-Type': 'application/octet-stream'});
+      res.end(Buffer.alloc(480));
+    });
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  try {
+    const credentials = {
+      api_key: 'test-key',
+      api_uri: `http://127.0.0.1:${server.address().port}`,
+      options: JSON.stringify({speed: 1.3})
+    };
+    const r = await synthAudio(stats, {
+      vendor: 'phonic', credentials, language: 'nb-NO', voice: 'grant',
+      text: 'phonic rest ' + Date.now(), renderForCaching: true, disableTtsCache: true
+    });
+    t.equal(seen.url, '/v1/tts/stream', 'stream endpoint');
+    t.equal(seen.auth, 'Bearer test-key', 'bearer auth');
+    t.deepEqual(seen.body.languages, ['no'], 'nb maps to no');
+    t.equal(seen.body.voice_id, 'grant', 'voice_id');
+    t.equal(seen.body.output_format, 'pcm_24000', 'raw 24k pcm');
+    t.equal(seen.body.speed, 1.3, 'speed from credential options');
+    t.notOk('model' in seen.body, 'model left out when unset');
+    t.ok(r.filePath.endsWith('.r24'), 'headerless 24k cache file');
+
+    const say = await synthAudio(stats, {
+      vendor: 'phonic', credentials: {api_key: 'K'}, language: 'xx-YY', voice: 'sabrina',
+      options: {model_id: 'merritt'}, text: 'phonic say ' + Date.now(), disableTtsCache: true
+    });
+    t.ok(say.filePath.startsWith('say:{api_key=K,'), 'say url');
+    t.ok(say.filePath.includes(',vendor=phonic,voice=sabrina,'), 'vendor and voice');
+    t.ok(say.filePath.includes(',model_id=merritt}'), 'model_id');
+    t.end();
+  } catch (err) {
+    t.end(err);
+  } finally {
+    server.close();
+    client.quit();
+  }
+});
+
 test('kokoro speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
