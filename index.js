@@ -16,6 +16,7 @@ module.exports = (opts, logger) => {
     synthAudio: require('./lib/synth-audio').bind(null, client, createHash, retrieveHash, logger),
 
     getAwsAuthToken: require('./lib/get-aws-sts-token').bind(null, logger, createHash, retrieveHash),
+    getViadialogAccessToken: require('./lib/get-viadialog-token').bind(null, client, logger),
     getTtsVoices: require('./lib/get-tts-voices').bind(null, client, createHash, retrieveHash, logger),
   };
 };

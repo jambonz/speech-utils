@@ -1027,6 +1027,103 @@ test('Elevenlabs speech synth tests', async(t) => {
   client.quit();
 });
 
+test('Viadialog: login token is cached and used for say and render', async(t) => {
+  const http = require('http');
+  delete process.env.JAMBONES_DISABLE_TTS_STREAMING;
+  delete require.cache[require.resolve('../lib/config')];
+  delete require.cache[require.resolve('../lib/synth-audio')];
+  delete require.cache[require.resolve('..')];
+  const fn = require('..');
+  const {synthAudio, getViadialogAccessToken, client} = fn(opts, logger);
+  const seen = {logins: 0, tts: []};
+  const server = http.createServer((req, res) => {
+    let body = '';
+    req.on('data', (d) => body += d);
+    req.on('end', () => {
+      if (req.url.startsWith('/gw/auth/login')) {
+        seen.logins++;
+        const {username, password, slug} = JSON.parse(body);
+        if (username !== 'u1' || password !== 'p1' || slug !== 's1') {
+          res.writeHead(401);
+          return res.end();
+        }
+        res.writeHead(200, {'Content-Type': 'application/json'});
+        return res.end(JSON.stringify({access_token: 'tok-abc', expires_in: 43199}));
+      }
+      seen.tts.push({url: req.url, auth: req.headers['authorization'], body: JSON.parse(body)});
+      res.writeHead(200, {'Content-Type': 'audio/mpeg'});
+      res.end(Buffer.alloc(1024));
+    });
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const credentials = {
+    username: 'u1', password: 'p1', slug: `s1`,
+    auth_uri: `${base}/gw/auth/login?run=${Date.now()}`,
+    tts_uri: `ws://127.0.0.1:${server.address().port}/rgw/viatone/elevenlabs-standard/`
+  };
+  try {
+    seen.logins = 0;
+    const say = await synthAudio(stats, {
+      vendor: 'viadialog', credentials, language: 'fr-FR', voice: 'cecile', text: 'bonjour', disableTtsCache: true
+    });
+    t.ok(say.filePath.startsWith('say:{api_key=tok-abc,'), 'say string carries the access token');
+    t.ok(say.filePath.includes(',vendor=viadialog,') && say.filePath.includes(',language=fr,'),
+      'say string names the vendor and a bare language code');
+    t.ok(say.filePath.endsWith('}bonjour'), 'say string ends with the text');
+
+    await synthAudio(stats, {
+      vendor: 'viadialog', credentials, language: 'de-DE', voice: 'cecile', text: 'hallo',
+      renderForCaching: true, disableTtsCache: true
+    });
+    t.equal(seen.logins, 1, 'second synth reuses the cached token');
+    t.equal(seen.tts.length, 1, 'render path reached the tts server');
+    t.equal(seen.tts[0].url, '/rgw/viatone/elevenlabs-standard/v1/text-to-speech/cecile?output_format=mp3_44100_128',
+      'render path keeps the base path');
+    t.equal(seen.tts[0].auth, 'Bearer tok-abc', 'render path sends the token as bearer');
+    t.equal(seen.tts[0].body.language_code, undefined, 'unsupported language is omitted');
+
+    try {
+      await synthAudio(stats, {
+        vendor: 'viadialog', credentials, language: 'fr-FR', voice: 'cecile,api_uri=https://evil.example',
+        text: 'x', disableTtsCache: true
+      });
+      t.fail('a voice with control characters should be rejected');
+    } catch (err) {
+      t.ok(/viadialog voice may only contain/.test(err.message), 'voice cannot inject control-string fields');
+    }
+
+    for (const [field, value, re] of [
+      ['tts_uri', 'wss://h.example,api_uri=https://evil.example', /tts_uri must be/],
+      ['tts_model_id', 'm}spoken', /tts_model_id may only contain/],
+    ]) {
+      try {
+        await synthAudio(stats, {
+          vendor: 'viadialog', credentials: {...credentials, [field]: value}, language: 'fr-FR', voice: 'cecile',
+          text: 'x', disableTtsCache: true
+        });
+        t.fail(`a ${field} with control characters should be rejected`);
+      } catch (err) {
+        t.ok(re.test(err.message), `${field} cannot inject control-string fields`);
+      }
+    }
+
+    try {
+      await getViadialogAccessToken({...credentials, password: 'wrong'});
+      t.fail('bad password should fail');
+    } catch (err) {
+      t.ok(/login failed: 401/.test(err.message), 'bad password surfaces the login failure');
+    }
+    t.end();
+  } catch (err) {
+    console.error(err);
+    t.end(err);
+  } finally {
+    server.close();
+    client.quit();
+  }
+});
+
 test('Cartesia speech synth tests', async(t) => {
   const fn = require('..');
   const {synthAudio, client} = fn(opts, logger);
